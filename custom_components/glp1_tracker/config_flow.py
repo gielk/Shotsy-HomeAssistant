@@ -67,21 +67,15 @@ def _common_fields(values: dict[str, Any]) -> dict:
         _suggested(CONF_WEIGHT_ENTITY, values): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="sensor", device_class=SensorDeviceClass.WEIGHT)
         ),
-        _suggested(CONF_HEIGHT_ENTITY, values): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="sensor")
-        ),
+        _suggested(CONF_HEIGHT_ENTITY, values): selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor")),
         _suggested(CONF_HEIGHT_CM, values): _number(50, 250, 1, "cm"),
     }
 
 
 def _model_fields(values: dict[str, Any]) -> dict:
     return {
-        vol.Required(CONF_HALF_LIFE, default=values.get(CONF_HALF_LIFE, DEFAULT_HALF_LIFE)): _number(
-            0.5, 30, 0.1, "d"
-        ),
-        vol.Required(CONF_TMAX_HOURS, default=values.get(CONF_TMAX_HOURS, DEFAULT_TMAX_HOURS)): _number(
-            1, 240, 1, "h"
-        ),
+        vol.Required(CONF_HALF_LIFE, default=values.get(CONF_HALF_LIFE, DEFAULT_HALF_LIFE)): _number(0.5, 30, 0.1, "d"),
+        vol.Required(CONF_TMAX_HOURS, default=values.get(CONF_TMAX_HOURS, DEFAULT_TMAX_HOURS)): _number(1, 240, 1, "h"),
     }
 
 

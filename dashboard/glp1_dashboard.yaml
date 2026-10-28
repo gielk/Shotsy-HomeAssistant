@@ -1,0 +1,2034 @@
+title: Medicatie
+button_card_templates:
+  glp1_kaart:
+    show_icon: true
+    show_name: true
+    show_label: true
+    show_state: false
+    tap_action:
+      action: none
+    hold_action:
+      action: none
+    styles:
+      card:
+      - padding: 16px
+      img_cell:
+      - width: 44px
+      - height: 44px
+      - border-radius: 50%
+      - background: color-mix(in srgb, var(--primary-color) 18%, transparent)
+      - align-self: center
+      icon:
+      - width: 24px
+      - color: var(--primary-color)
+      name:
+      - justify-self: start
+      - align-self: end
+      - font-size: 15px
+      - font-weight: '600'
+      - text-align: left
+      label:
+      - justify-self: start
+      - align-self: start
+      - font-size: 12.5px
+      - color: var(--secondary-text-color)
+      - text-align: left
+      - white-space: normal
+      - margin-top: 2px
+  glp1_rond:
+    show_name: false
+    show_state: false
+    show_label: false
+    hold_action:
+      action: none
+    styles:
+      card:
+      - width: 44px
+      - height: 44px
+      - border-radius: 50%
+      - padding: '0'
+      - background: color-mix(in srgb, var(--primary-text-color) 8%, transparent)
+      - box-shadow: none
+      - border: none
+      icon:
+      - width: 22px
+      - color: var(--primary-text-color)
+  glp1_pil:
+    show_state: false
+    show_label: false
+    hold_action:
+      action: none
+    styles:
+      card:
+      - height: 36px
+      - padding: 0 14px 0 10px
+      - border-radius: 18px
+      - background: color-mix(in srgb, var(--primary-color) 18%, transparent)
+      - box-shadow: none
+      - border: none
+      grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: auto auto
+      - column-gap: 6px
+      icon:
+      - width: 18px
+      - color: var(--primary-color)
+      name:
+      - font-size: 13px
+      - font-weight: '600'
+      - color: var(--primary-color)
+  glp1_actie:
+    show_state: false
+    show_label: false
+    hold_action:
+      action: none
+    styles:
+      card:
+      - height: 44px
+      - padding: 0 18px
+      - border-radius: 22px
+      - background: var(--primary-color)
+      - box-shadow: none
+      - border: none
+      grid:
+      - grid-template-areas: '"i n"'
+      - grid-template-columns: auto auto
+      - column-gap: 8px
+      icon:
+      - width: 20px
+      - color: '#fff'
+      name:
+      - font-size: 14px
+      - font-weight: '600'
+      - color: '#fff'
+  glp1_segment:
+    entity: select.retatrutide_grafiekperiode
+    show_icon: false
+    show_name: true
+    show_label: false
+    show_state: false
+    tap_action:
+      action: perform-action
+      perform_action: select.select_option
+      target:
+        entity_id: select.retatrutide_grafiekperiode
+      data:
+        option: '[[[ return variables.optie; ]]]'
+    hold_action:
+      action: none
+    styles:
+      card:
+      - padding: 9px 4px
+      - border-radius: 12px
+      - box-shadow: none
+      - border: none
+      - background: '[[[ return entity?.state === variables.optie ? ''var(--primary-color)'' : ''color-mix(in srgb, var(--primary-text-color) 8%, transparent)''; ]]]'
+      name:
+      - font-size: 13px
+      - font-weight: '600'
+      - color: '[[[ return entity?.state === variables.optie ? ''#fff'' : ''var(--primary-text-color)''; ]]]'
+  glp1_rij:
+    show_icon: true
+    show_name: true
+    show_label: true
+    show_state: false
+    hold_action:
+      action: none
+    styles:
+      card:
+      - padding: 12px 14px
+      grid:
+      - grid-template-areas: '"i n right" "i l right"'
+      - grid-template-columns: 40px 1fr auto
+      - grid-template-rows: auto auto
+      - column-gap: 12px
+      img_cell:
+      - width: 40px
+      - height: 40px
+      - border-radius: 12px
+      - align-self: center
+      - background: color-mix(in srgb, var(--primary-color) 18%, transparent)
+      icon:
+      - width: 22px
+      - color: var(--primary-color)
+      name:
+      - justify-self: start
+      - align-self: end
+      - font-size: 14px
+      - font-weight: '600'
+      label:
+      - justify-self: start
+      - align-self: start
+      - font-size: 12px
+      - color: var(--secondary-text-color)
+      - text-align: left
+      - white-space: normal
+      custom_fields:
+        right:
+        - align-self: center
+        - display: flex
+        - gap: 8px
+  glp1_dag:
+    show_icon: false
+    show_name: true
+    show_label: false
+    show_state: false
+    triggers_update:
+    - date.retatrutide_agendadag
+    - sensor.retatrutide_dagoverzicht
+    variables:
+      dag: |-
+        [[[
+        const st = (e) => states[e]?.state;
+        const at = (e, a) => states[e]?.attributes?.[a];
+        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const sel = st('date.retatrutide_agendadag') || iso(new Date());
+        const [y, m] = sel.split('-').map(Number);
+        const offset = (new Date(y, m - 1, 1).getDay() + 6) % 7;
+        const n = variables.cel - offset + 1;
+        if (n < 1 || n > new Date(y, m, 0).getDate()) return {n: null, iso: sel};
+        const day = iso(new Date(y, m - 1, n));
+        const info = (at('sensor.retatrutide_dagoverzicht', 'month') || [])[n - 1] || {};
+        return {n, iso: day, info, selected: day === sel, today: day === iso(new Date())};
+        ]]]
+    name: '[[[ return variables.dag.n ? String(variables.dag.n) : ''''; ]]]'
+    custom_fields:
+      stip: |-
+        [[[
+        const d = variables.dag;
+        if (!d.n || !d.info.log) return '';
+        return `<div style="width:5px;height:5px;border-radius:50%;background:${d.info.dose ? '#fff' : '#F5B82E'};margin:0 auto"></div>`;
+        ]]]
+    tap_action:
+      action: perform-action
+      perform_action: date.set_value
+      target:
+        entity_id: date.retatrutide_agendadag
+      data:
+        date: '[[[ return variables.dag.iso; ]]]'
+    hold_action:
+      action: none
+    styles:
+      card:
+      - height: 40px
+      - width: 40px
+      - padding: '0'
+      - margin: 0 auto
+      - border-radius: 50%
+      - box-shadow: none
+      - border: |-
+          [[[
+          const d = variables.dag; return d.selected ? '2px solid var(--primary-text-color)' : '2px solid transparent';
+          ]]]
+      - background: |-
+          [[[
+          const kleur = (d) => ['#F9A8D4', '#F472B6', '#EC4899', '#DB2777', '#C026D3', '#A21CAF', '#7E22CE', '#6B21A8', '#4C1D95'][Math.max(0, Math.min(8, Math.round(Number(d)) - 1))];
+          const d = variables.dag;
+          if (!d.n) return 'none';
+          if (d.info.dose) return kleur(d.info.dose);
+          if (d.today) return 'color-mix(in srgb, var(--primary-text-color) 14%, transparent)';
+          return 'none';
+          ]]]
+      grid:
+      - grid-template-areas: '"n" "stip"'
+      - grid-template-rows: 1fr 6px
+      name:
+      - font-size: 15px
+      - align-self: end
+      - font-weight: '[[[ return variables.dag.today || variables.dag.selected ? ''700'' : ''400''; ]]]'
+      - color: '[[[ return variables.dag.info?.dose ? ''#fff'' : ''var(--primary-text-color)''; ]]]'
+      custom_fields:
+        stip:
+        - align-self: start
+  glp1_plek:
+    entity: select.retatrutide_volgende_prikplek
+    show_icon: false
+    show_name: true
+    show_label: true
+    show_state: false
+    triggers_update:
+    - sensor.retatrutide_aantal_injecties
+    label: |-
+      [[[
+      const at = (e, a) => states[e]?.attributes?.[a];
+      const used = (at('sensor.retatrutide_aantal_injecties', 'injections') || []).find((i) => i.site === variables.plek);
+      if (!used) return 'nooit';
+      const d = Math.floor((Date.now() - used.t) / 864e5);
+      return d === 0 ? 'vandaag' : (d === 1 ? 'gisteren' : `${d} dagen`);
+      ]]]
+    tap_action:
+      action: perform-action
+      perform_action: select.select_option
+      target:
+        entity_id: select.retatrutide_volgende_prikplek
+      data:
+        option: '[[[ return variables.plek; ]]]'
+    hold_action:
+      action: none
+    styles:
+      card:
+      - padding: 10px 4px
+      - border-radius: 14px
+      - box-shadow: none
+      - border: '[[[ return entity?.attributes?.options?.includes(variables.plek) ? ''none'' : ''1px dashed var(--divider-color)''; ]]]'
+      - background: '[[[ return entity?.state === variables.plek ? ''var(--primary-color)'' : ''color-mix(in srgb, var(--primary-text-color) 6%, transparent)''; ]]]'
+      name:
+      - font-size: 13px
+      - font-weight: '600'
+      - color: '[[[ return entity?.state === variables.plek ? ''#fff'' : ''var(--primary-text-color)''; ]]]'
+      label:
+      - font-size: 11px
+      - color: '[[[ return entity?.state === variables.plek ? ''rgba(255,255,255,.85)'' : ''var(--secondary-text-color)''; ]]]'
+  glp1_bijwerking:
+    template: glp1_rij
+    icon: mdi:emoticon-sick-outline
+    label: |-
+      [[[
+      const v = Number(entity?.state) || 0;
+      const words = ['Geen', 'Licht', 'Licht', 'Licht', 'Matig', 'Matig', 'Matig', 'Ernstig', 'Ernstig', 'Ernstig', 'Heel ernstig'];
+      const dots = Array.from({length: 10}, (_, k) => `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px;background:${k < v ? (v >= 7 ? 'var(--error-color, #e45649)' : (v >= 4 ? '#F5B82E' : 'var(--success-color, #4caf50)')) : 'color-mix(in srgb, var(--primary-text-color) 15%, transparent)'}"></span>`).join('');
+      return `${words[Math.round(v)]}${v ? ' · ' + v + '/10' : ''}<div style="margin-top:5px">${dots}</div>`;
+      ]]]
+    tap_action:
+      action: more-info
+    styles:
+      img_cell:
+      - background: '[[[ const v = Number(entity?.state) || 0; return v >= 7 ? ''color-mix(in srgb, var(--error-color, #e45649) 18%, transparent)'' : (v >= 4 ? ''color-mix(in srgb, #F5B82E 22%, transparent)''
+          : (v > 0 ? ''color-mix(in srgb, var(--success-color, #4caf50) 18%, transparent)'' : ''color-mix(in srgb, var(--primary-text-color) 8%, transparent)'')); ]]]'
+      icon:
+      - color: '[[[ const v = Number(entity?.state) || 0; return v >= 7 ? ''var(--error-color, #e45649)'' : (v >= 4 ? ''#F5B82E'' : (v > 0 ? ''var(--success-color, #4caf50)'' : ''var(--secondary-text-color)''));
+          ]]]'
+views:
+- title: Medicatie
+  path: medicatie
+  icon: mdi:needle
+  type: sections
+  max_columns: 1
+  badges: []
+  sections:
+  - type: grid
+    cards:
+    - type: heading
+      heading: Retatrutide
+      icon: mdi:needle
+    - type: custom:simple-tabs
+      tabs_alignment: start
+      remember_tab: true
+      tabs:
+      - title: Overzicht
+        icon: mdi:clipboard-text-outline
+        cards:
+        - type: custom:button-card
+          template: glp1_kaart
+          entity: sensor.retatrutide_volgende_injectie
+          icon: mdi:needle
+          triggers_update:
+          - sensor.retatrutide_laatste_injectie
+          - sensor.retatrutide_volgende_injectie
+          variables:
+            v: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const at = (e, a) => states[e]?.attributes?.[a];
+              const e = 'sensor.retatrutide_volgende_injectie', l = 'sensor.retatrutide_laatste_injectie';
+              const due = ok(e) ? new Date(st(e)) : null;
+              const last = ok(l) ? new Date(st(l)) : null;
+              const now = new Date();
+              const start = new Date(now); start.setHours(0, 0, 0, 0);
+              const days = due ? Math.round((new Date(due).setHours(0, 0, 0, 0) - start) / 864e5) : null;
+              return {due, last, now, days, late: due ? now > due : false, dose: at(e, 'dose_mg'), site: at(e, 'site'), n: at(e, 'number')};
+              ]]]
+          name: |-
+            [[[
+            const v = variables.v;
+            if (!v.due) return 'Nog geen injectie gepland';
+            if (v.late) {
+              const d = Math.floor((v.now - v.due) / 864e5);
+              return d >= 1 ? `${d} ${d === 1 ? 'dag' : 'dagen'} te laat` : 'Tijd voor je injectie';
+            }
+            if (v.days === 0) return 'Vandaag';
+            if (v.days === 1) return 'Morgen';
+            return `Over ${v.days} dagen`;
+            ]]]
+          label: |-
+            [[[
+            const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+            const tijd = (t) => new Date(t).toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+            const v = variables.v;
+            if (!v.due) return 'Registreer je eerste injectie';
+            return `Injectie ${v.n}, ${dag(v.due)} om ${tijd(v.due)}${v.site ? ' · ' + v.site : ''}`;
+            ]]]
+          custom_fields:
+            val: |-
+              [[[
+              const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+              const d = variables.v.dose;
+              return d ? `${dosis(d)}<span style="font-size:17px;font-weight:600;margin-left:2px">mg</span>` : '';
+              ]]]
+            bar: |-
+              [[[
+              const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+              const sub = 'color:var(--secondary-text-color)';
+              const v = variables.v;
+              if (!v.due || !v.last) return '';
+              const pct = Math.max(0, Math.min(100, (v.now - v.last) / (v.due - v.last) * 100));
+              const col = v.late ? 'var(--error-color, #e45649)' : 'var(--primary-color)';
+              return `<div style="position:relative;height:10px;border-radius:5px;background:color-mix(in srgb, var(--primary-text-color) 10%, transparent);overflow:hidden">
+              <div style="position:absolute;top:0;bottom:0;left:0;width:${pct}%;background:${col};border-radius:5px"></div></div>
+              <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;${sub}"><span>Vorige <b style="color:var(--primary-text-color)">${dag(v.last)}</b></span><span>Volgende <b style="color:var(--primary-text-color)">${dag(v.due)}</b></span></div>`;
+              ]]]
+            knop:
+              card:
+                type: custom:button-card
+                template: glp1_actie
+                icon: mdi:check
+                name: Injectie gezet
+                tap_action:
+                  action: perform-action
+                  perform_action: button.press
+                  target:
+                    entity_id: button.retatrutide_injectie_registreren
+                  confirmation:
+                    text: |-
+                      [[[
+                      const at = (e, a) => states[e]?.attributes?.[a];
+                      const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+                      const e = 'sensor.retatrutide_volgende_injectie';
+                      return `Injectie ${at(e, 'number')} registreren: ${dosis(at(e, 'dose_mg'))} mg in ${at(e, 'site') || 'geen plek'}, nu?`;
+                      ]]]
+            wijzig:
+              card:
+                type: custom:button-card
+                template: glp1_pil
+                icon: mdi:calendar-edit
+                name: Datum
+                tap_action:
+                  action: more-info
+                  entity: datetime.retatrutide_volgende_injectie
+          styles:
+            grid:
+            - grid-template-areas: '"i n val" "i l val" "bar bar bar" "knop knop wijzig"'
+            - grid-template-columns: 44px 1fr auto
+            - grid-template-rows: auto auto auto auto
+            - column-gap: 12px
+            img_cell:
+            - background: '[[[ return variables.v.late ? ''color-mix(in srgb, var(--error-color, #e45649) 18%, transparent)'' : ''color-mix(in srgb, var(--primary-color) 18%, transparent)''; ]]]'
+            icon:
+            - color: '[[[ return variables.v.late ? ''var(--error-color, #e45649)'' : ''var(--primary-color)''; ]]]'
+            custom_fields:
+              val:
+              - align-self: center
+              - justify-self: end
+              - font-size: 34px
+              - font-weight: '700'
+              - line-height: '1'
+              bar:
+              - margin-top: 16px
+              - justify-self: stretch
+              knop:
+              - margin-top: 14px
+              - justify-self: start
+              wijzig:
+              - margin-top: 14px
+              - justify-self: end
+              - align-self: center
+        - type: custom:button-card
+          template: glp1_kaart
+          entity: sensor.retatrutide_medicatieniveau
+          icon: mdi:chart-bell-curve-cumulative
+          tap_action:
+            action: more-info
+          name: Geschat medicatieniveau
+          label: |-
+            [[[
+            const at = (e, a) => states[e]?.attributes?.[a];
+            const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+            const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+            const e = 'sensor.retatrutide_medicatieniveau';
+            const peak = at(e, 'peak_next_7_days'), pt = at(e, 'peak_time');
+            const parts = [`Vandaag gemiddeld ${nl(at(e, 'today_average'), 2)} mg`];
+            if (peak && pt) parts.push(`piek ${nl(peak, 1)} mg op ${dag(pt)}`);
+            return parts.join(' · ');
+            ]]]
+          custom_fields:
+            val: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+              const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+              return `${nl(num('sensor.retatrutide_medicatieniveau'), 2)}<span style="font-size:17px;font-weight:600;margin-left:2px">mg</span>`;
+              ]]]
+          styles:
+            grid:
+            - grid-template-areas: '"i n val" "i l val"'
+            - grid-template-columns: 44px 1fr auto
+            - column-gap: 12px
+            custom_fields:
+              val:
+              - align-self: center
+              - font-size: 30px
+              - font-weight: '700'
+              - line-height: '1'
+        - type: custom:apexcharts-card
+          graph_span: 35d
+          span:
+            offset: +14d
+          update_interval: 10min
+          now:
+            show: true
+            label: Nu
+            color: '#8a8a8a'
+          header:
+            show: true
+            title: Niveau, 3 weken terug en 2 vooruit
+            show_states: false
+          apex_config:
+            chart:
+              height: 200
+            legend:
+              show: true
+              position: top
+              horizontalAlign: left
+              fontSize: 12px
+            grid:
+              strokeDashArray: 3
+              borderColor: rgba(127,127,127,0.18)
+            tooltip:
+              x:
+                format: ddd d MMM HH:mm
+          yaxis:
+          - min: 0
+            decimals: 0
+            apex_config:
+              tickAmount: 4
+          series:
+          - entity: sensor.retatrutide_medicatieniveau
+            name: Niveau
+            type: area
+            color: '#A21CAF'
+            opacity: 0.2
+            stroke_width: 2
+            unit: mg
+            float_precision: 2
+            data_generator: return (entity.attributes.series || []).filter((p) => p[0] <= Date.now());
+          - entity: sensor.retatrutide_medicatieniveau
+            name: Met geplande prik
+            type: line
+            color: '#A21CAF'
+            stroke_width: 2
+            stroke_dash: 4
+            unit: mg
+            float_precision: 2
+            data_generator: return (entity.attributes.planned || []).filter((p) => p[0] >= Date.now() - 3 * 36e5);
+        - type: custom:button-card
+          show_icon: false
+          show_name: false
+          show_state: false
+          show_label: false
+          tap_action:
+            action: none
+          hold_action:
+            action: none
+          triggers_update:
+          - sensor.retatrutide_aantal_injecties
+          - sensor.retatrutide_laatste_dosis
+          - sensor.retatrutide_gewicht
+          - sensor.retatrutide_gewicht_verandering
+          custom_fields:
+            tegels: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+              const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+              const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+              const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+              const sub = 'color:var(--secondary-text-color)';
+              const tile = (icon, label, value, extra) => `<div style="padding:12px 10px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--primary-color)"></ha-icon>${label}</div>
+              <div style="font-size:22px;font-weight:700;margin-top:6px;line-height:1.1">${value}</div>
+              <div style="font-size:11.5px;${sub};margin-top:3px">${extra}</div></div>`;
+              const change = num('sensor.retatrutide_gewicht_verandering');
+              const last = num('sensor.retatrutide_laatste_dosis');
+              return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              ${tile('mdi:needle', 'Injecties', st('sensor.retatrutide_aantal_injecties') ?? '—', 'genomen')}
+              ${tile('mdi:eyedropper', 'Laatste dosis', last === null ? '—' : dosis(last) + '<span style="font-size:13px"> mg</span>', ok('sensor.retatrutide_laatste_injectie') ? dag(st('sensor.retatrutide_laatste_injectie')) : '')}
+              ${tile('mdi:scale-bathroom', 'Gewicht', nl(num('sensor.retatrutide_gewicht'), 1) + '<span style="font-size:13px"> kg</span>', change === null ? '' : `${change > 0 ? '+' : ''}${nl(change, 1)} kg sinds start`)}
+              </div>`;
+              ]]]
+          styles:
+            card:
+            - padding: 12px
+            grid:
+            - grid-template-areas: '"tegels"'
+            - grid-template-columns: 1fr
+            custom_fields:
+              tegels:
+              - justify-self: stretch
+      - title: Injecties
+        icon: mdi:needle
+        cards:
+        - type: custom:button-card
+          template: glp1_kaart
+          entity: number.retatrutide_volgende_dosis
+          icon: mdi:eyedropper
+          triggers_update:
+          - sensor.retatrutide_volgende_injectie
+          name: |-
+            [[[
+            const at = (e, a) => states[e]?.attributes?.[a];
+            return `Injectie ${at('sensor.retatrutide_volgende_injectie', 'number') ?? ''}`;
+            ]]]
+          label: |-
+            [[[
+            const st = (e) => states[e]?.state;
+            const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+            const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+            const tijd = (t) => new Date(t).toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+            const e = 'sensor.retatrutide_volgende_injectie';
+            if (!ok(e)) return 'Nog niet gepland';
+            return `Gepland ${dag(st(e))} om ${tijd(st(e))}`;
+            ]]]
+          custom_fields:
+            val: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+              const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+              const d = num('number.retatrutide_volgende_dosis');
+              return d === null ? '—' : `${dosis(d)}<span style="font-size:17px;font-weight:600;margin-left:2px">mg</span>`;
+              ]]]
+            minus:
+              card:
+                type: custom:button-card
+                template: glp1_rond
+                icon: mdi:minus
+                tap_action:
+                  action: perform-action
+                  perform_action: number.set_value
+                  target:
+                    entity_id: number.retatrutide_volgende_dosis
+                  data:
+                    value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_volgende_dosis''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+            plus:
+              card:
+                type: custom:button-card
+                template: glp1_rond
+                icon: mdi:plus
+                tap_action:
+                  action: perform-action
+                  perform_action: number.set_value
+                  target:
+                    entity_id: number.retatrutide_volgende_dosis
+                  data:
+                    value: '[[[ return Math.min(50, Math.round((Number(states[''number.retatrutide_volgende_dosis''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+            datum:
+              card:
+                type: custom:button-card
+                template: glp1_pil
+                icon: mdi:calendar-edit
+                name: Datum en tijd
+                tap_action:
+                  action: more-info
+                  entity: datetime.retatrutide_volgende_injectie
+          styles:
+            grid:
+            - grid-template-areas: '"i n n val val" "i l l val val" "datum datum datum minus plus"'
+            - grid-template-columns: 44px 1fr auto 44px 44px
+            - grid-template-rows: auto auto auto
+            - column-gap: 12px
+            custom_fields:
+              val:
+              - align-self: center
+              - justify-self: end
+              - font-size: 34px
+              - font-weight: '700'
+              - line-height: '1'
+              datum:
+              - margin-top: 14px
+              - justify-self: start
+              - align-self: center
+              minus:
+              - margin-top: 14px
+              plus:
+              - margin-top: 14px
+        - type: custom:button-card
+          template: glp1_kaart
+          entity: select.retatrutide_volgende_prikplek
+          icon: mdi:human-handsdown
+          triggers_update:
+          - sensor.retatrutide_volgende_injectie
+          name: Prikplek
+          label: |-
+            [[[
+            const st = (e) => states[e]?.state;
+            const at = (e, a) => states[e]?.attributes?.[a];
+            const sel = st('select.retatrutide_volgende_prikplek');
+            const sug = at('sensor.retatrutide_volgende_injectie', 'suggested_site');
+            if (!sel) return 'Kies een plek';
+            return sel === sug ? `${sel}, langst niet gebruikt` : `${sel} · voorstel: ${sug}`;
+            ]]]
+          custom_fields:
+            cellen:
+              card:
+                type: grid
+                columns: 3
+                square: false
+                cards:
+                - type: custom:button-card
+                  template: glp1_plek
+                  name: Links boven
+                  variables:
+                    plek: Buik - Links Boven
+                - type: custom:button-card
+                  template: glp1_plek
+                  name: Midden boven
+                  variables:
+                    plek: Buik - Midden Boven
+                - type: custom:button-card
+                  template: glp1_plek
+                  name: Rechts boven
+                  variables:
+                    plek: Buik - Rechts Boven
+                - type: custom:button-card
+                  template: glp1_plek
+                  name: Links onder
+                  variables:
+                    plek: Buik - Links Onder
+                - type: custom:button-card
+                  template: glp1_plek
+                  name: Midden onder
+                  variables:
+                    plek: Buik - Midden Onder
+                - type: custom:button-card
+                  template: glp1_plek
+                  name: Rechts onder
+                  variables:
+                    plek: Buik - Rechts Onder
+            anders:
+              card:
+                type: custom:button-card
+                template: glp1_pil
+                icon: mdi:dots-horizontal
+                name: Andere plek
+                tap_action:
+                  action: more-info
+                  entity: select.retatrutide_volgende_prikplek
+          styles:
+            grid:
+            - grid-template-areas: '"i n" "i l" "cellen cellen" "anders anders"'
+            - grid-template-columns: 44px 1fr
+            - grid-template-rows: auto auto auto auto
+            - column-gap: 12px
+            custom_fields:
+              cellen:
+              - justify-self: stretch
+              - margin-top: 12px
+              anders:
+              - justify-self: start
+              - margin-top: 10px
+        - type: custom:button-card
+          show_icon: false
+          show_name: false
+          show_state: false
+          show_label: false
+          tap_action:
+            action: none
+          hold_action:
+            action: none
+          triggers_update:
+          - sensor.retatrutide_aantal_injecties
+          custom_fields:
+            lijst: |-
+              [[[
+              const at = (e, a) => states[e]?.attributes?.[a];
+              const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+              const kleur = (d) => ['#F9A8D4', '#F472B6', '#EC4899', '#DB2777', '#C026D3', '#A21CAF', '#7E22CE', '#6B21A8', '#4C1D95'][Math.max(0, Math.min(8, Math.round(Number(d)) - 1))];
+              const pil = (d) => `<span style="display:inline-flex;align-items:center;padding:1px 9px;border-radius:10px;background:${kleur(d)};color:#fff;font-size:12px;font-weight:600;line-height:20px;white-space:nowrap">${dosis(d)} mg</span>`;
+              const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+              const tijd = (t) => new Date(t).toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+              const sub = 'color:var(--secondary-text-color)';
+              const list = at('sensor.retatrutide_aantal_injecties', 'injections') || [];
+              const name = states['sensor.retatrutide_laatste_injectie']?.attributes?.friendly_name?.split(' ')[0] || 'Injectie';
+              if (!list.length) return `<div style="${sub};font-size:13px">Nog geen injecties</div>`;
+              let month = '', out = '';
+              for (const i of list.slice(0, 6)) {
+                const m = new Date(i.t).toLocaleDateString('nl-NL', {month: 'long', year: 'numeric'}).toUpperCase();
+                if (m !== month) {
+                  month = m;
+                  out += `<div style="font-size:12px;letter-spacing:.04em;${sub};margin:${out ? 14 : 0}px 0 6px">${m}</div>`;
+                }
+                const extra = [i.site, i.pain ? `pijn ${i.pain}/10` : '', i.notes].filter(Boolean).join(' · ');
+                out += `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--divider-color)">
+              <div style="text-align:left;min-width:0"><div style="font-size:11.5px;${sub}">Injectie ${i.n}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:2px;font-size:14px;font-weight:600">${name} ${pil(i.dose)}</div>
+              <div style="font-size:12px;${sub};margin-top:2px;white-space:normal">${extra}</div></div>
+              <div style="font-size:12.5px;${sub};text-align:right;white-space:nowrap">${dag(i.t)}<br>${tijd(i.t)}</div></div>`;
+              }
+              return out;
+              ]]]
+          styles:
+            card:
+            - padding: 12px 16px
+            - box-shadow: var(--ha-card-box-shadow, none)
+            grid:
+            - grid-template-areas: '"lijst"'
+            - grid-template-columns: 1fr
+            custom_fields:
+              lijst:
+              - justify-self: stretch
+        - type: custom:expander-card
+          expanded: false
+          title-card-button-overlay: true
+          padding: 0px
+          title-card-padding: 0px
+          child-padding: 0px
+          gap: 0px
+          title-card:
+            type: custom:button-card
+            template: glp1_rij
+            icon: mdi:history
+            name: Alle injecties
+            label: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              return `${st('sensor.retatrutide_aantal_injecties') ?? 0} injecties sinds de start`;
+              ]]]
+            tap_action:
+              action: none
+            styles:
+              card:
+              - background: none
+              - box-shadow: none
+              - border: none
+          cards:
+          - type: custom:button-card
+            show_icon: false
+            show_name: false
+            show_state: false
+            show_label: false
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            triggers_update:
+            - sensor.retatrutide_aantal_injecties
+            custom_fields:
+              lijst: |-
+                [[[
+                const at = (e, a) => states[e]?.attributes?.[a];
+                const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+                const kleur = (d) => ['#F9A8D4', '#F472B6', '#EC4899', '#DB2777', '#C026D3', '#A21CAF', '#7E22CE', '#6B21A8', '#4C1D95'][Math.max(0, Math.min(8, Math.round(Number(d)) - 1))];
+                const pil = (d) => `<span style="display:inline-flex;align-items:center;padding:1px 9px;border-radius:10px;background:${kleur(d)};color:#fff;font-size:12px;font-weight:600;line-height:20px;white-space:nowrap">${dosis(d)} mg</span>`;
+                const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+                const tijd = (t) => new Date(t).toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+                const sub = 'color:var(--secondary-text-color)';
+                const list = at('sensor.retatrutide_aantal_injecties', 'injections') || [];
+                const name = states['sensor.retatrutide_laatste_injectie']?.attributes?.friendly_name?.split(' ')[0] || 'Injectie';
+                if (!list.length) return `<div style="${sub};font-size:13px">Nog geen injecties</div>`;
+                let month = '', out = '';
+                for (const i of list.slice(0, 1000)) {
+                  const m = new Date(i.t).toLocaleDateString('nl-NL', {month: 'long', year: 'numeric'}).toUpperCase();
+                  if (m !== month) {
+                    month = m;
+                    out += `<div style="font-size:12px;letter-spacing:.04em;${sub};margin:${out ? 14 : 0}px 0 6px">${m}</div>`;
+                  }
+                  const extra = [i.site, i.pain ? `pijn ${i.pain}/10` : '', i.notes].filter(Boolean).join(' · ');
+                  out += `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--divider-color)">
+                <div style="text-align:left;min-width:0"><div style="font-size:11.5px;${sub}">Injectie ${i.n}</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:2px;font-size:14px;font-weight:600">${name} ${pil(i.dose)}</div>
+                <div style="font-size:12px;${sub};margin-top:2px;white-space:normal">${extra}</div></div>
+                <div style="font-size:12.5px;${sub};text-align:right;white-space:nowrap">${dag(i.t)}<br>${tijd(i.t)}</div></div>`;
+                }
+                return out;
+                ]]]
+            styles:
+              card:
+              - padding: 12px 16px
+              - box-shadow: none
+              - background: none
+              - border: none
+              grid:
+              - grid-template-areas: '"lijst"'
+              - grid-template-columns: 1fr
+              custom_fields:
+                lijst:
+                - justify-self: stretch
+                - max-height: 480px
+                - overflow-y: auto
+          - type: custom:button-card
+            template: glp1_rij
+            icon: mdi:delete-outline
+            name: Laatste injectie verwijderen
+            label: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const at = (e, a) => states[e]?.attributes?.[a];
+              const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+              const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+              const l = 'sensor.retatrutide_laatste_injectie';
+              return ok(l) ? `Injectie ${at(l, 'number')}: ${dosis(at(l, 'dose_mg'))} mg op ${dag(st(l))}` : 'Geen injecties';
+              ]]]
+            tap_action:
+              action: perform-action
+              perform_action: glp1_tracker.delete_injection
+              data:
+                injection_id: last
+              confirmation:
+                text: De laatste injectie verwijderen?
+            styles:
+              card:
+              - background: none
+              - box-shadow: none
+              - border: none
+              img_cell:
+              - background: 'color-mix(in srgb, var(--error-color, #e45649) 15%, transparent)'
+              icon:
+              - color: 'var(--error-color, #e45649)'
+      - title: Resultaten
+        icon: mdi:chart-bar
+        cards:
+        - type: grid
+          columns: 4
+          square: false
+          cards:
+          - type: custom:button-card
+            template: glp1_segment
+            name: 1 maand
+            variables:
+              optie: 1m
+          - type: custom:button-card
+            template: glp1_segment
+            name: 3 maanden
+            variables:
+              optie: 3m
+          - type: custom:button-card
+            template: glp1_segment
+            name: 6 maanden
+            variables:
+              optie: 6m
+          - type: custom:button-card
+            template: glp1_segment
+            name: Altijd
+            variables:
+              optie: all
+        - type: custom:button-card
+          show_icon: false
+          show_name: false
+          show_state: false
+          show_label: false
+          tap_action:
+            action: more-info
+            entity: sensor.retatrutide_gewicht
+          hold_action:
+            action: none
+          triggers_update:
+          - sensor.retatrutide_gewicht
+          - sensor.retatrutide_gewicht_verandering
+          - sensor.retatrutide_gewicht_verandering_procent
+          - sensor.retatrutide_bmi
+          - sensor.retatrutide_gewicht_per_week
+          - sensor.retatrutide_tot_doel
+          custom_fields:
+            tegels: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+              const at = (e, a) => states[e]?.attributes?.[a];
+              const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+              const sub = 'color:var(--secondary-text-color)';
+              const tile = (icon, label, value, unit) => `<div style="padding:12px 10px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--primary-color)"></ha-icon>${label}</div>
+              <div style="font-size:22px;font-weight:700;margin-top:6px;line-height:1.1;white-space:nowrap">${value}<span style="font-size:12px;font-weight:500;${sub}"> ${unit}</span></div></div>`;
+              const signed = (x, d) => x === null ? '—' : `${x > 0 ? '+' : ''}${nl(x, d)}`;
+              const goalPct = at('sensor.retatrutide_tot_doel', 'to_goal_percent');
+              return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              ${tile('mdi:scale-unbalanced', 'Totale verandering', signed(num('sensor.retatrutide_gewicht_verandering'), 1), 'kg')}
+              ${tile('mdi:human', 'BMI', nl(num('sensor.retatrutide_bmi'), 1), '')}
+              ${tile('mdi:scale-bathroom', 'Gewicht', nl(num('sensor.retatrutide_gewicht'), 1), 'kg')}
+              ${tile('mdi:percent-outline', 'Procent', signed(num('sensor.retatrutide_gewicht_verandering_procent'), 1), '%')}
+              ${tile('mdi:timer-sand', 'Per week', signed(num('sensor.retatrutide_gewicht_per_week'), 2), 'kg')}
+              ${tile('mdi:flag-checkered', 'Naar doel', nl(num('sensor.retatrutide_tot_doel'), 1), goalPct === null || goalPct === undefined ? 'kg' : `kg (${Math.round(goalPct)}%)`)}
+              </div>`;
+              ]]]
+          styles:
+            card:
+            - padding: 12px
+            grid:
+            - grid-template-areas: '"tegels"'
+            - grid-template-columns: 1fr
+            custom_fields:
+              tegels:
+              - justify-self: stretch
+        - type: custom:config-template-card
+          entities:
+          - select.retatrutide_grafiekperiode
+          - sensor.retatrutide_gewicht
+          - sensor.retatrutide_aantal_injecties
+          - number.retatrutide_doelgewicht
+          variables:
+            SPAN: '(() => { const r = states[''select.retatrutide_grafiekperiode'']?.state; if (r === ''1m'') return ''31d''; if (r === ''3m'') return ''92d''; if (r === ''6m'') return ''183d''; const h
+              = states[''sensor.retatrutide_gewicht'']?.attributes?.history || []; const first = h.length ? h[0][0] : Date.now(); return Math.max(31, Math.ceil((Date.now() - first) / 864e5) + 7) + ''d'';
+              })()'
+          card:
+            type: custom:apexcharts-card
+            graph_span: ${SPAN}
+            update_interval: 1h
+            header:
+              show: true
+              title: Gewicht en dosis
+              show_states: false
+            apex_config:
+              chart:
+                height: 240
+              legend:
+                show: true
+                position: top
+                horizontalAlign: left
+                fontSize: 12px
+              grid:
+                strokeDashArray: 3
+                borderColor: rgba(127,127,127,0.18)
+              tooltip:
+                x:
+                  format: ddd d MMM yyyy
+              markers:
+                size: 0
+            yaxis:
+            - id: kg
+              decimals: 0
+              apex_config:
+                tickAmount: 4
+            - id: mg
+              opposite: true
+              min: 0
+              decimals: 0
+              apex_config:
+                tickAmount: 4
+            series:
+            - entity: sensor.retatrutide_aantal_injecties
+              name: Dosis
+              type: area
+              curve: stepline
+              yaxis_id: mg
+              color: '#A21CAF'
+              opacity: 0.15
+              stroke_width: 1.5
+              unit: mg
+              data_generator: const l = [...(entity.attributes.injections || [])].reverse().map((i) => [i.t, i.dose]); if (l.length) l.push([Date.now(), l[l.length - 1][1]]); return l;
+            - entity: sensor.retatrutide_gewicht
+              name: Gewicht
+              type: line
+              yaxis_id: kg
+              color: '#DA7756'
+              stroke_width: 2.5
+              unit: kg
+              float_precision: 1
+              data_generator: return entity.attributes.history || [];
+            - entity: number.retatrutide_doelgewicht
+              name: Doel
+              type: line
+              yaxis_id: kg
+              color: '#F5B82E'
+              stroke_width: 2
+              stroke_dash: 4
+              unit: kg
+              data_generator: const g = Number(entity.state); if (!Number.isFinite(g) || g <= 0) return []; return [[Date.now() - 2000 * 864e5, g], [Date.now(), g]];
+        - type: custom:button-card
+          template: glp1_kaart
+          entity: sensor.retatrutide_tot_doel
+          icon: mdi:flag-checkered
+          triggers_update:
+          - sensor.retatrutide_gewicht
+          - number.retatrutide_doelgewicht
+          - number.retatrutide_startgewicht
+          name: |-
+            [[[
+            const at = (e, a) => states[e]?.attributes?.[a];
+            const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+            const m = at('sensor.retatrutide_tot_doel', 'next_milestone');
+            return m ? `Volgend tussendoel ${dosis(m)} kg` : 'Voortgang';
+            ]]]
+          label: |-
+            [[[
+            const st = (e) => states[e]?.state;
+            const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+            const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+            const at = (e, a) => states[e]?.attributes?.[a];
+            const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+            const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+            const goal = at('sensor.retatrutide_tot_doel', 'goal');
+            const togo = num('sensor.retatrutide_tot_doel');
+            if (!goal) return 'Stel een doelgewicht in bij Instellingen';
+            return togo === 0 ? `Doel van ${dosis(goal)} kg bereikt` : `Nog ${nl(togo, 1)} kg tot je doel van ${dosis(goal)} kg`;
+            ]]]
+          custom_fields:
+            val: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+              const at = (e, a) => states[e]?.attributes?.[a];
+              const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+              const sub = 'color:var(--secondary-text-color)';
+              const m = at('sensor.retatrutide_tot_doel', 'next_milestone'), w = num('sensor.retatrutide_gewicht');
+              if (!m || w === null) return '';
+              return `${nl(w - m, 1)}<span style="font-size:15px;font-weight:600;margin-left:2px">kg</span><div style="font-size:11.5px;font-weight:400;${sub};text-align:right;margin-top:2px">te gaan</div>`;
+              ]]]
+            bar: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+              const at = (e, a) => states[e]?.attributes?.[a];
+              const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+              const sub = 'color:var(--secondary-text-color)';
+              const start = num('number.retatrutide_startgewicht'), goal = at('sensor.retatrutide_tot_doel', 'goal'), w = num('sensor.retatrutide_gewicht');
+              if (!start || !goal || w === null || start <= goal) return '';
+              const pct = (x) => Math.max(0, Math.min(100, (start - x) / (start - goal) * 100));
+              let ticks = '';
+              for (let k = Math.ceil(goal / 5) * 5; k < start; k += 5) {
+                ticks += `<div style="position:absolute;top:0;bottom:0;left:calc(${pct(k)}% - 1px);width:2px;background:var(--card-background-color, #fff);opacity:.6"></div>`;
+              }
+              return `<div style="position:relative;height:10px;border-radius:5px;background:color-mix(in srgb, var(--primary-text-color) 10%, transparent);overflow:hidden">
+              <div style="position:absolute;top:0;bottom:0;left:0;width:${pct(w)}%;background:var(--primary-color);border-radius:5px"></div>${ticks}</div>
+              <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;${sub}"><span>Start <b style="color:var(--primary-text-color)">${nl(start, 1)} kg</b></span><span><b style="color:var(--primary-text-color)">${Math.round(pct(w))}%</b> van je doel</span><span>Doel <b style="color:var(--primary-text-color)">${nl(goal, 1)} kg</b></span></div>`;
+              ]]]
+          styles:
+            grid:
+            - grid-template-areas: '"i n val" "i l val" "bar bar bar"'
+            - grid-template-columns: 44px 1fr auto
+            - grid-template-rows: auto auto auto
+            - column-gap: 12px
+            custom_fields:
+              val:
+              - align-self: center
+              - font-size: 26px
+              - font-weight: '700'
+              - line-height: '1'
+              bar:
+              - margin-top: 16px
+              - justify-self: stretch
+        - type: custom:button-card
+          template: glp1_kaart
+          entity: sensor.retatrutide_gewicht_per_week
+          icon: mdi:chart-timeline-variant
+          name: Gewichtsverlies per dosis
+          label: Elke periode tussen twee injecties telt voor de dosis van de eerste
+          custom_fields:
+            tabel: |-
+              [[[
+              const at = (e, a) => states[e]?.attributes?.[a];
+              const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+              const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+              const kleur = (d) => ['#F9A8D4', '#F472B6', '#EC4899', '#DB2777', '#C026D3', '#A21CAF', '#7E22CE', '#6B21A8', '#4C1D95'][Math.max(0, Math.min(8, Math.round(Number(d)) - 1))];
+              const pil = (d) => `<span style="display:inline-flex;align-items:center;padding:1px 9px;border-radius:10px;background:${kleur(d)};color:#fff;font-size:12px;font-weight:600;line-height:20px;white-space:nowrap">${dosis(d)} mg</span>`;
+              const sub = 'color:var(--secondary-text-color)';
+              const rows = at('sensor.retatrutide_gewicht_per_week', 'dose_stats') || [];
+              if (!rows.length) return `<div style="${sub};font-size:13px">Nog te weinig metingen</div>`;
+              return rows.map((r) => {
+                const v = r.kg_per_week;
+                const col = v === null ? 'var(--secondary-text-color)' : (v < 0 ? 'var(--success-color, #4caf50)' : 'var(--error-color, #e45649)');
+                return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--divider-color)">
+              <div style="display:flex;align-items:center;gap:10px">${pil(r.dose_mg)}<span style="font-size:12.5px;${sub}">${r.injections}× · ${nl(r.weeks, 1)} wk</span></div>
+              <div style="font-size:14px;font-weight:600;color:${col}">${v === null ? '—' : `${v > 0 ? '+' : ''}${nl(v, 2)} kg/wk`}</div></div>`;
+              }).join('');
+              ]]]
+          styles:
+            grid:
+            - grid-template-areas: '"i n" "i l" "tabel tabel"'
+            - grid-template-columns: 44px 1fr
+            - grid-template-rows: auto auto auto
+            - column-gap: 12px
+            custom_fields:
+              tabel:
+              - justify-self: stretch
+              - margin-top: 12px
+      - title: Agenda
+        icon: mdi:calendar-month
+        cards:
+        - type: custom:stack-in-card
+          mode: vertical
+          cards:
+          - type: custom:button-card
+            entity: date.retatrutide_agendadag
+            show_icon: false
+            show_name: true
+            show_label: false
+            show_state: false
+            tap_action:
+              action: more-info
+            hold_action:
+              action: none
+            name: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+              const [y, m] = (st('date.retatrutide_agendadag') || iso(new Date())).split('-').map(Number);
+              return new Date(y, m - 1, 1).toLocaleDateString('nl-NL', {month: 'long', year: 'numeric'});
+              ]]]
+            custom_fields:
+              terug:
+                card:
+                  type: custom:button-card
+                  template: glp1_rond
+                  icon: mdi:chevron-left
+                  tap_action:
+                    action: perform-action
+                    perform_action: date.set_value
+                    target:
+                      entity_id: date.retatrutide_agendadag
+                    data:
+                      date: |-
+                        [[[
+                        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        const [y, m, d] = (states['date.retatrutide_agendadag']?.state || iso(new Date())).split('-').map(Number);
+                        const last = new Date(y, m - 1 + (-1) + 1, 0).getDate();
+                        return iso(new Date(y, m - 1 + (-1), Math.min(d, last)));
+                        ]]]
+              vooruit:
+                card:
+                  type: custom:button-card
+                  template: glp1_rond
+                  icon: mdi:chevron-right
+                  tap_action:
+                    action: perform-action
+                    perform_action: date.set_value
+                    target:
+                      entity_id: date.retatrutide_agendadag
+                    data:
+                      date: |-
+                        [[[
+                        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        const [y, m, d] = (states['date.retatrutide_agendadag']?.state || iso(new Date())).split('-').map(Number);
+                        const last = new Date(y, m - 1 + (1) + 1, 0).getDate();
+                        return iso(new Date(y, m - 1 + (1), Math.min(d, last)));
+                        ]]]
+              vandaag:
+                card:
+                  type: custom:button-card
+                  template: glp1_pil
+                  icon: mdi:calendar-today
+                  name: Vandaag
+                  tap_action:
+                    action: perform-action
+                    perform_action: date.set_value
+                    target:
+                      entity_id: date.retatrutide_agendadag
+                    data:
+                      date: |-
+                        [[[
+                        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        return iso(new Date());
+                        ]]]
+              weekdagen: <div style="display:grid;grid-template-columns:repeat(7,1fr);font-size:12px;color:var(--secondary-text-color);text-align:center"><span>ma</span><span>di</span><span>wo</span><span>do</span><span>vr</span><span>za</span><span>zo</span></div>
+            styles:
+              card:
+              - padding: 14px 14px 6px
+              - background: none
+              - box-shadow: none
+              - border: none
+              grid:
+              - grid-template-areas: '"n vandaag terug vooruit" "weekdagen weekdagen weekdagen weekdagen"'
+              - grid-template-columns: 1fr auto 44px 44px
+              - column-gap: 8px
+              name:
+              - justify-self: start
+              - font-size: 20px
+              - font-weight: '700'
+              - text-transform: capitalize
+              custom_fields:
+                weekdagen:
+                - justify-self: stretch
+                - margin-top: 12px
+          - type: grid
+            columns: 7
+            square: false
+            cards:
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 0
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 1
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 2
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 3
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 4
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 5
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 6
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 7
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 8
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 9
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 10
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 11
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 12
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 13
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 14
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 15
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 16
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 17
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 18
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 19
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 20
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 21
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 22
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 23
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 24
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 25
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 26
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 27
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 28
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 29
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 30
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 31
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 32
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 33
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 34
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 35
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 36
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 37
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 38
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 39
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 40
+            - type: custom:button-card
+              template: glp1_dag
+              variables:
+                cel: 41
+        - type: custom:button-card
+          template: glp1_kaart
+          entity: sensor.retatrutide_dagoverzicht
+          icon: mdi:calendar-text
+          name: |-
+            [[[
+            const a = states['sensor.retatrutide_dagoverzicht']?.attributes || {};
+            if (!a.date) return '';
+            const [y, m, d] = a.date.split('-').map(Number);
+            const text = new Date(y, m - 1, d).toLocaleDateString('nl-NL', {weekday: 'long', day: 'numeric', month: 'long'});
+            return a.is_today ? `Vandaag, ${text.split(' ').slice(1).join(' ')}` : text.charAt(0).toUpperCase() + text.slice(1);
+            ]]]
+          label: |-
+            [[[
+            const a = states['sensor.retatrutide_dagoverzicht']?.attributes || {};
+            const n = Object.keys(a.side_effects || {}).length;
+            return n ? `${n} ${n === 1 ? 'bijwerking' : 'bijwerkingen'} genoteerd` : 'Geen bijwerkingen genoteerd';
+            ]]]
+          custom_fields:
+            tegels: |-
+              [[[
+              const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+              const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+              const kleur = (d) => ['#F9A8D4', '#F472B6', '#EC4899', '#DB2777', '#C026D3', '#A21CAF', '#7E22CE', '#6B21A8', '#4C1D95'][Math.max(0, Math.min(8, Math.round(Number(d)) - 1))];
+              const pil = (d) => `<span style="display:inline-flex;align-items:center;padding:1px 9px;border-radius:10px;background:${kleur(d)};color:#fff;font-size:12px;font-weight:600;line-height:20px;white-space:nowrap">${dosis(d)} mg</span>`;
+              const tijd = (t) => new Date(t).toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+              const sub = 'color:var(--secondary-text-color)';
+              const a = states['sensor.retatrutide_dagoverzicht']?.attributes || {};
+              const tile = (icon, color, label, value, wide) => `<div style="padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left;${wide ? 'grid-column:span 2' : ''}">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color}"></ha-icon>${label}</div>
+              <div style="font-size:16px;font-weight:600;margin-top:6px;white-space:normal">${value}</div></div>`;
+              const inj = (a.injections || []).map((i) => `${pil(i.dose)} <span style="font-size:12.5px;font-weight:400;${sub}">${tijd(i.time)}${i.site ? ' · ' + i.site : ''}</span>`).join('<br>') || '—';
+              return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              ${tile('mdi:needle', 'var(--primary-color)', 'Injectie', inj, true)}
+              ${tile('mdi:chart-bell-curve-cumulative', '#A21CAF', 'Gesch. niveau', `${nl(states['sensor.retatrutide_dagoverzicht']?.state, 2)} mg`)}
+              ${tile('mdi:scale-bathroom', '#F5B82E', 'Gewicht', a.weight ? `${nl(a.weight, 1)} kg` : '—')}
+              ${tile('mdi:food-apple', '#F97316', 'Calorieën', a.calories ? `${Math.round(a.calories)} kcal` : '—')}
+              ${tile('mdi:food-steak', '#EF4444', 'Eiwitten', a.protein ? `${Math.round(a.protein)} g` : '—')}
+              </div>`;
+              ]]]
+          styles:
+            grid:
+            - grid-template-areas: '"i n" "i l" "tegels tegels"'
+            - grid-template-columns: 44px 1fr
+            - grid-template-rows: auto auto auto
+            - column-gap: 12px
+            name:
+            - text-transform: none
+            custom_fields:
+              tegels:
+              - justify-self: stretch
+              - margin-top: 12px
+        - type: custom:stack-in-card
+          mode: vertical
+          cards:
+          - type: heading
+            heading: Bijwerkingen
+            heading_style: subtitle
+            icon: mdi:emoticon-sick-outline
+          - type: custom:button-card
+            template: glp1_bijwerking
+            entity: number.retatrutide_bijwerking_food_noise
+            name: Food Noise
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_food_noise
+                          data:
+                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_food_noise''].state) || 0 - 1) / 1) * 1); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_food_noise
+                          data:
+                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_food_noise''].state) || 0 + 1) / 1) * 1); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"minus plus"'
+                    - grid-template-columns: 44px 44px
+                    - column-gap: 8px
+          - type: custom:button-card
+            template: glp1_bijwerking
+            entity: number.retatrutide_bijwerking_misselijkheid
+            name: Misselijkheid
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_misselijkheid
+                          data:
+                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_misselijkheid''].state) || 0 - 1) / 1) * 1); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_misselijkheid
+                          data:
+                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_misselijkheid''].state) || 0 + 1) / 1) * 1); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"minus plus"'
+                    - grid-template-columns: 44px 44px
+                    - column-gap: 8px
+          - type: custom:button-card
+            template: glp1_bijwerking
+            entity: number.retatrutide_bijwerking_brandend_maagzuur
+            name: Brandend maagzuur
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_brandend_maagzuur
+                          data:
+                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_brandend_maagzuur''].state) || 0 - 1) / 1) * 1); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_brandend_maagzuur
+                          data:
+                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_brandend_maagzuur''].state) || 0 + 1) / 1) * 1); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"minus plus"'
+                    - grid-template-columns: 44px 44px
+                    - column-gap: 8px
+          - type: custom:button-card
+            template: glp1_bijwerking
+            entity: number.retatrutide_bijwerking_verminderde_eetlust
+            name: Verminderde eetlust
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_verminderde_eetlust
+                          data:
+                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_verminderde_eetlust''].state) || 0 - 1) / 1) * 1); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_verminderde_eetlust
+                          data:
+                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_verminderde_eetlust''].state) || 0 + 1) / 1) * 1); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"minus plus"'
+                    - grid-template-columns: 44px 44px
+                    - column-gap: 8px
+          - type: custom:button-card
+            template: glp1_bijwerking
+            entity: number.retatrutide_bijwerking_vermoeidheid
+            name: Vermoeidheid
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_vermoeidheid
+                          data:
+                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_vermoeidheid''].state) || 0 - 1) / 1) * 1); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_vermoeidheid
+                          data:
+                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_vermoeidheid''].state) || 0 + 1) / 1) * 1); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"minus plus"'
+                    - grid-template-columns: 44px 44px
+                    - column-gap: 8px
+          - type: custom:button-card
+            template: glp1_bijwerking
+            entity: number.retatrutide_bijwerking_constipatie
+            name: Constipatie
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_constipatie
+                          data:
+                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_constipatie''].state) || 0 - 1) / 1) * 1); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_bijwerking_constipatie
+                          data:
+                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_constipatie''].state) || 0 + 1) / 1) * 1); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"minus plus"'
+                    - grid-template-columns: 44px 44px
+                    - column-gap: 8px
+        - type: grid
+          columns: 2
+          square: false
+          cards:
+          - type: tile
+            entity: number.retatrutide_calorieen
+            name: Calorieën
+            features:
+            - type: numeric-input
+              style: buttons
+            features_position: bottom
+          - type: tile
+            entity: number.retatrutide_eiwitten
+            name: Eiwitten
+            features:
+            - type: numeric-input
+              style: buttons
+            features_position: bottom
+        - type: entities
+          entities:
+          - entity: text.retatrutide_dagnotitie
+            name: Notitie voor de dag
+      - title: Instellingen
+        icon: mdi:cog
+        cards:
+        - type: custom:button-card
+          template: glp1_rij
+          entity: number.retatrutide_interval
+          icon: mdi:calendar-sync
+          name: Dagen tussen injecties
+          label: Plant de volgende na de vorige
+          tap_action:
+            action: more-info
+          custom_fields:
+            right:
+              card:
+                type: custom:button-card
+                entity: number.retatrutide_interval
+                show_icon: false
+                show_name: false
+                show_state: false
+                custom_fields:
+                  val: |-
+                    [[[
+                    const st = (e) => states[e]?.state;
+                    const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+                    const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+                    const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+                    const sub = 'color:var(--secondary-text-color)';
+                    const v = num('number.retatrutide_interval'); return v === null ? '—' : `${dosis(v)}<span style="font-size:12px;font-weight:500;${sub}"> d</span>`;
+                    ]]]
+                  minus:
+                    card:
+                      type: custom:button-card
+                      template: glp1_rond
+                      icon: mdi:minus
+                      tap_action:
+                        action: perform-action
+                        perform_action: number.set_value
+                        target:
+                          entity_id: number.retatrutide_interval
+                        data:
+                          value: '[[[ return Math.max(1, Math.round((Number(states[''number.retatrutide_interval''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+                  plus:
+                    card:
+                      type: custom:button-card
+                      template: glp1_rond
+                      icon: mdi:plus
+                      tap_action:
+                        action: perform-action
+                        perform_action: number.set_value
+                        target:
+                          entity_id: number.retatrutide_interval
+                        data:
+                          value: '[[[ return Math.min(28, Math.round((Number(states[''number.retatrutide_interval''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+                styles:
+                  card:
+                  - padding: '0'
+                  - background: none
+                  - box-shadow: none
+                  - border: none
+                  grid:
+                  - grid-template-areas: '"val minus plus"'
+                  - grid-template-columns: auto 44px 44px
+                  - column-gap: 8px
+                  custom_fields:
+                    val:
+                    - font-size: 18px
+                    - font-weight: '700'
+                    - margin-right: 4px
+                    - white-space: nowrap
+        - type: custom:button-card
+          template: glp1_rij
+          entity: number.retatrutide_doelgewicht
+          icon: mdi:flag
+          name: Doelgewicht
+          label: Voor 'Naar doel' en de voortgang
+          tap_action:
+            action: more-info
+          custom_fields:
+            right:
+              card:
+                type: custom:button-card
+                entity: number.retatrutide_doelgewicht
+                show_icon: false
+                show_name: false
+                show_state: false
+                custom_fields:
+                  val: |-
+                    [[[
+                    const st = (e) => states[e]?.state;
+                    const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+                    const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+                    const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+                    const sub = 'color:var(--secondary-text-color)';
+                    const v = num('number.retatrutide_doelgewicht'); return v === null ? '—' : `${nl(v, 1)}<span style="font-size:12px;font-weight:500;${sub}"> kg</span>`;
+                    ]]]
+                  minus:
+                    card:
+                      type: custom:button-card
+                      template: glp1_rond
+                      icon: mdi:minus
+                      tap_action:
+                        action: perform-action
+                        perform_action: number.set_value
+                        target:
+                          entity_id: number.retatrutide_doelgewicht
+                        data:
+                          value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_doelgewicht''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+                  plus:
+                    card:
+                      type: custom:button-card
+                      template: glp1_rond
+                      icon: mdi:plus
+                      tap_action:
+                        action: perform-action
+                        perform_action: number.set_value
+                        target:
+                          entity_id: number.retatrutide_doelgewicht
+                        data:
+                          value: '[[[ return Math.min(400, Math.round((Number(states[''number.retatrutide_doelgewicht''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+                styles:
+                  card:
+                  - padding: '0'
+                  - background: none
+                  - box-shadow: none
+                  - border: none
+                  grid:
+                  - grid-template-areas: '"val minus plus"'
+                  - grid-template-columns: auto 44px 44px
+                  - column-gap: 8px
+                  custom_fields:
+                    val:
+                    - font-size: 18px
+                    - font-weight: '700'
+                    - margin-right: 4px
+                    - white-space: nowrap
+        - type: custom:button-card
+          template: glp1_rij
+          entity: number.retatrutide_startgewicht
+          icon: mdi:flag-outline
+          name: Startgewicht
+          label: Standaard je eerste meting
+          tap_action:
+            action: more-info
+          custom_fields:
+            right:
+              card:
+                type: custom:button-card
+                entity: number.retatrutide_startgewicht
+                show_icon: false
+                show_name: false
+                show_state: false
+                custom_fields:
+                  val: |-
+                    [[[
+                    const st = (e) => states[e]?.state;
+                    const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+                    const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+                    const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
+                    const sub = 'color:var(--secondary-text-color)';
+                    const v = num('number.retatrutide_startgewicht'); return v === null ? '—' : `${nl(v, 1)}<span style="font-size:12px;font-weight:500;${sub}"> kg</span>`;
+                    ]]]
+                  minus:
+                    card:
+                      type: custom:button-card
+                      template: glp1_rond
+                      icon: mdi:minus
+                      tap_action:
+                        action: perform-action
+                        perform_action: number.set_value
+                        target:
+                          entity_id: number.retatrutide_startgewicht
+                        data:
+                          value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_startgewicht''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+                  plus:
+                    card:
+                      type: custom:button-card
+                      template: glp1_rond
+                      icon: mdi:plus
+                      tap_action:
+                        action: perform-action
+                        perform_action: number.set_value
+                        target:
+                          entity_id: number.retatrutide_startgewicht
+                        data:
+                          value: '[[[ return Math.min(400, Math.round((Number(states[''number.retatrutide_startgewicht''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+                styles:
+                  card:
+                  - padding: '0'
+                  - background: none
+                  - box-shadow: none
+                  - border: none
+                  grid:
+                  - grid-template-areas: '"val minus plus"'
+                  - grid-template-columns: auto 44px 44px
+                  - column-gap: 8px
+                  custom_fields:
+                    val:
+                    - font-size: 18px
+                    - font-weight: '700'
+                    - margin-right: 4px
+                    - white-space: nowrap
+        - type: tile
+          entity: datetime.retatrutide_volgende_injectie
+          name: Volgende injectie handmatig
+          icon: mdi:calendar-edit
+          tap_action:
+            action: more-info
+        - type: tile
+          entity: automation.medicatie_injectie_herinnering
+          name: Herinnering op iPhone
+          icon: mdi:bell-ring-outline
+          features:
+          - type: toggle
+          features_position: inline
+        - type: custom:button-card
+          template: glp1_rij
+          icon: mdi:cog-outline
+          name: Meer instellingen
+          label: Prikplekken, bijwerkingen, vaste weekdag, sensoren
+          tap_action:
+            action: navigate
+            navigation_path: /config/integrations/integration/glp1_tracker
+          custom_fields:
+            right: <ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:24px;color:var(--secondary-text-color)"></ha-icon>
+        - type: custom:expander-card
+          expanded: false
+          title-card-button-overlay: true
+          padding: 0px
+          title-card-padding: 0px
+          child-padding: 0px 16px 14px 16px
+          gap: 0px
+          title-card:
+            type: custom:button-card
+            template: glp1_rij
+            icon: mdi:help-circle-outline
+            name: Hoe werkt het?
+            label: Niveau, planning, gewicht en je gegevens
+            tap_action:
+              action: none
+            styles:
+              card:
+              - background: none
+              - box-shadow: none
+              - border: none
+          cards:
+          - type: markdown
+            text_only: true
+            content: |-
+              **Niveau.** Per injectie telt een curve die na ongeveer anderhalve dag piekt en daarna met een halfwaardetijd van ongeveer {{ state_attr('sensor.retatrutide_medicatieniveau', 'half_life_days') }} dagen afneemt. Alle injecties samen geven het geschatte niveau. Voor retatrutide is de curve afgeleid van je Shotsy-export, zodat de getallen vrijwel gelijk zijn. Het is een schatting, geen bloedwaarde.
+
+              **Planning.** De volgende injectie komt het aantal dagen na de vorige, of op de vaste weekdag als die is ingesteld. Met *Datum en tijd* zet je hem eenmalig anders. Na een registratie gaat de planning weer vanzelf.
+
+              **Prikplek.** Standaard de plek die het langst niet is gebruikt.
+
+              **Gewicht.** Elke nieuwe waarde van je gewichtsensor wordt bewaard, ook als Home Assistant de geschiedenis al heeft opgeruimd.
+
+              **Gegevens.** Alles staat lokaal in Home Assistant. Back-up via de actie *Gegevens exporteren*.

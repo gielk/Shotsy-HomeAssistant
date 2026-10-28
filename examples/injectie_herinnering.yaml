@@ -1,0 +1,63 @@
+# Herinnering op je telefoon als de volgende injectie gepland staat.
+# Knoppen in de melding: "Gezet" registreert de injectie, "Over 1 uur" herinnert later opnieuw.
+# Vervang notify.mobile_app_jouw_telefoon door je eigen telefoon (Instellingen > Ontwikkelhulpmiddelen > Acties).
+alias: Medicatie - Injectie herinnering
+description: >-
+  Meldt op de telefoon wanneer de volgende injectie gepland staat. Met de knop Gezet wordt
+  de injectie geregistreerd met de geplande dosis en prikplek, met Over 1 uur komt de melding later terug.
+mode: parallel
+max: 5
+triggers:
+  - trigger: time
+    at: sensor.retatrutide_volgende_injectie
+    id: gepland
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: GLP1_GEZET
+    id: gezet
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: GLP1_LATER
+    id: later
+actions:
+  - if:
+      - condition: trigger
+        id: gezet
+    then:
+      - action: glp1_tracker.log_injection
+      - action: notify.mobile_app_jouw_telefoon
+        data:
+          title: Injectie {{ state_attr('sensor.retatrutide_laatste_injectie', 'number') }} geregistreerd
+          message: >-
+            {{ '%g' | format(state_attr('sensor.retatrutide_laatste_injectie', 'dose_mg')) }} mg,
+            {{ state_attr('sensor.retatrutide_laatste_injectie', 'site') }}.
+            Volgende: {{ as_timestamp(states('sensor.retatrutide_volgende_injectie')) | timestamp_custom('%d-%m om %H:%M') }}.
+          data:
+            tag: glp1-injectie
+      - stop: Injectie geregistreerd
+  - if:
+      - condition: trigger
+        id: later
+    then:
+      - delay: "01:00:00"
+  - condition: template
+    value_template: "{{ as_timestamp(states('sensor.retatrutide_volgende_injectie'), 0) <= now().timestamp() }}"
+    note: Alleen als de injectie nog niet is geregistreerd; daarna ligt de planning in de toekomst.
+  - action: notify.mobile_app_jouw_telefoon
+    data:
+      title: Tijd voor injectie {{ state_attr('sensor.retatrutide_volgende_injectie', 'number') }}
+      message: >-
+        {{ '%g' | format(state_attr('sensor.retatrutide_volgende_injectie', 'dose_mg')) }} mg retatrutide,
+        {{ state_attr('sensor.retatrutide_volgende_injectie', 'site') }}
+      data:
+        tag: glp1-injectie
+        url: /dashboard-medicatie/medicatie
+        push:
+          interruption-level: time-sensitive
+        actions:
+          - action: GLP1_GEZET
+            title: Gezet
+          - action: GLP1_LATER
+            title: Over 1 uur

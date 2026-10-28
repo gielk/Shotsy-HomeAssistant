@@ -63,12 +63,7 @@ class DayLog:
     protein: float | None = None
 
     def is_empty(self) -> bool:
-        return (
-            not self.side_effects
-            and not self.notes
-            and self.calories is None
-            and self.protein is None
-        )
+        return not self.side_effects and not self.notes and self.calories is None and self.protein is None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -107,9 +102,7 @@ class TrackerData:
         return {
             "injections": [i.to_dict() for i in self.injections],
             "weights": [w.to_dict() for w in self.weights],
-            "days": {
-                d.isoformat(): log.to_dict() for d, log in sorted(self.days.items()) if not log.is_empty()
-            },
+            "days": {d.isoformat(): log.to_dict() for d, log in sorted(self.days.items()) if not log.is_empty()},
             "next_dose": self.next_dose,
             "next_site": self.next_site,
             "next_due_override": self.next_due_override.isoformat() if self.next_due_override else None,

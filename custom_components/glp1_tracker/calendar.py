@@ -61,7 +61,9 @@ class InjectionCalendar(GLP1Entity, CalendarEntity):
                 CalendarEvent(
                     start=due,
                     end=due + INJECTION_DURATION,
-                    summary=f"Gepland: {tracker.medication_name} {_fmt(dose)} mg" if dose else f"Gepland: {tracker.medication_name}",
+                    summary=f"Gepland: {tracker.medication_name} {_fmt(dose)} mg"
+                    if dose
+                    else f"Gepland: {tracker.medication_name}",
                     description=f"Injectie {len(records.injections) + 1}" + (f"\n{site}" if site else ""),
                     uid="planned",
                 )
@@ -99,9 +101,7 @@ class InjectionCalendar(GLP1Entity, CalendarEntity):
     def event(self) -> CalendarEvent | None:
         """The current or next injection event."""
         now = dt_util.now()
-        upcoming = [
-            e for e in self._events() if isinstance(e.start, datetime) and self._bounds(e)[1] > now
-        ]
+        upcoming = [e for e in self._events() if isinstance(e.start, datetime) and self._bounds(e)[1] > now]
         return min(upcoming, key=lambda e: e.start, default=None)
 
     async def async_get_events(

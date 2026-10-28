@@ -217,9 +217,7 @@ class GLP1Tracker(DataUpdateCoordinator[dict[str, Any]]):
         return True
 
     def _rebuild_calc(self) -> None:
-        self._calc = LevelCalculator(
-            self.model, [(i.time.timestamp(), i.dose_mg) for i in self.records.injections]
-        )
+        self._calc = LevelCalculator(self.model, [(i.time.timestamp(), i.dose_mg) for i in self.records.injections])
         # A new dict, so a calculation still running keeps its own cache.
         self._daily_cache = {}
 

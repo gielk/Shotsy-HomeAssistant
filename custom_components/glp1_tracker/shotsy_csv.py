@@ -130,15 +130,11 @@ def parse_shotsy_csv(text: str, tz: tzinfo, medication: str | None = None) -> Sh
         if weight_col and (kg := _number(row.get(weight_col))) is not None:
             if weight_unit != "kg":
                 kg = round(kg * LBS_TO_KG, 2)
-            result.weights.append(
-                WeightEntry(time=datetime.combine(day, WEIGHT_TIME, tz), kg=kg, source="shotsy")
-            )
+            result.weights.append(WeightEntry(time=datetime.combine(day, WEIGHT_TIME, tz), kg=kg, source="shotsy"))
 
         log = DayLog(
             side_effects={
-                col.strip(): value
-                for col in side_cols
-                if (value := _number(row.get(col))) is not None and value > 0
+                col.strip(): value for col in side_cols if (value := _number(row.get(col))) is not None and value > 0
             },
             notes=(row.get("Day Notes") or "").strip(),
             calories=_number(row.get(calories_col)) if calories_col else None,

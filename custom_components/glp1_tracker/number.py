@@ -65,8 +65,7 @@ NUMBERS: tuple[GLP1NumberDescription, ...] = (
         native_step=0.1,
         mode=NumberMode.BOX,
         entity_category=EntityCategory.CONFIG,
-        value_fn=lambda t: t.records.start_weight
-        or (t.records.weights[0].kg if t.records.weights else None),
+        value_fn=lambda t: t.records.start_weight or (t.records.weights[0].kg if t.records.weights else None),
         set_fn=lambda t, v: t.async_set(start_weight=v or None),
     ),
     GLP1NumberDescription(

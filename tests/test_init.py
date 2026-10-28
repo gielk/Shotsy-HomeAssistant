@@ -51,9 +51,7 @@ async def test_config_flow(hass: HomeAssistant, enable_custom_integrations) -> N
     )
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "model"
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"half_life_days": 5, "tmax_hours": 24}
-    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"half_life_days": 5, "tmax_hours": 24})
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Mijn medicijn"
     await hass.async_block_till_done()
@@ -195,7 +193,11 @@ async def test_agenda_day(hass: HomeAssistant, entry, sample_csv) -> None:
     events = await hass.services.async_call(
         "calendar",
         "get_events",
-        {"entity_id": "calendar.retatrutide_agenda", "start_date_time": "2025-01-01 00:00:00", "duration": {"days": 30}},
+        {
+            "entity_id": "calendar.retatrutide_agenda",
+            "start_date_time": "2025-01-01 00:00:00",
+            "duration": {"days": 30},
+        },
         blocking=True,
         return_response=True,
     )

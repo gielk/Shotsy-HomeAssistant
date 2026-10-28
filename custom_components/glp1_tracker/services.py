@@ -92,14 +92,14 @@ def _local(value: datetime | None) -> datetime | None:
 
 
 def _tracker(hass: HomeAssistant, call: ServiceCall) -> GLP1Tracker:
-    entries = [
-        e for e in hass.config_entries.async_entries(DOMAIN) if e.state is ConfigEntryState.LOADED
-    ]
+    entries = [e for e in hass.config_entries.async_entries(DOMAIN) if e.state is ConfigEntryState.LOADED]
     if entry_id := call.data.get(ATTR_CONFIG_ENTRY_ID):
         entries = [e for e in entries if e.entry_id == entry_id]
         if not entries:
             raise ServiceValidationError(
-                translation_domain=DOMAIN, translation_key="entry_not_found", translation_placeholders={"entry_id": entry_id}
+                translation_domain=DOMAIN,
+                translation_key="entry_not_found",
+                translation_placeholders={"entry_id": entry_id},
             )
     elif len(entries) != 1:
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="entry_required")

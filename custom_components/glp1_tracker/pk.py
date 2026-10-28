@@ -116,15 +116,33 @@ Model = ProfileModel | BatemanModel
 
 
 # Retatrutide: dose-response curve fitted to 13 months of Shotsy exports
-# (75 injections, 406 daily averages). It matches Shotsy's own estimate within
+# (74 injections, 406 daily averages). It matches Shotsy's own estimate within
 # about 0.12 mg. Peak about 1.5 days after the injection, then a tail with a
 # half-life of 7 days. Published half-life is about 6 days (Urva et al.,
 # Lancet 2022).
 RETATRUTIDE = ProfileModel(
     knots=(0, 0.25, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 12, 14),
     values=(
-        0.0, 0.544, 0.694, 0.804, 0.825, 0.804, 0.794, 0.776, 0.741, 0.674,
-        0.584, 0.503, 0.441, 0.414, 0.372, 0.326, 0.293, 0.257, 0.207, 0.176,
+        0.0,
+        0.544,
+        0.694,
+        0.804,
+        0.825,
+        0.804,
+        0.794,
+        0.776,
+        0.741,
+        0.674,
+        0.584,
+        0.503,
+        0.441,
+        0.414,
+        0.372,
+        0.326,
+        0.293,
+        0.257,
+        0.207,
+        0.176,
     ),
     tail_half_life=7.0,
 )
