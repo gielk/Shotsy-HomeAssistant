@@ -1,0 +1,155 @@
+log_injection:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: glp1_tracker
+    dose_mg:
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 0.05
+          unit_of_measurement: mg
+          mode: box
+    time:
+      selector:
+        datetime:
+    site:
+      selector:
+        text:
+    pain:
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 1
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_injection:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: glp1_tracker
+    injection_id:
+      required: true
+      example: last
+      selector:
+        text:
+    dose_mg:
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 0.05
+          unit_of_measurement: mg
+          mode: box
+    time:
+      selector:
+        datetime:
+    site:
+      selector:
+        text:
+    pain:
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 1
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_injection:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: glp1_tracker
+    injection_id:
+      required: true
+      example: last
+      selector:
+        text:
+
+log_day:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: glp1_tracker
+    date:
+      selector:
+        date:
+    side_effects:
+      example: '{"Misselijkheid": 3}'
+      selector:
+        object:
+    notes:
+      selector:
+        text:
+          multiline: true
+    calories:
+      selector:
+        number:
+          min: 0
+          max: 10000
+          unit_of_measurement: kcal
+          mode: box
+    protein:
+      selector:
+        number:
+          min: 0
+          max: 1000
+          unit_of_measurement: g
+          mode: box
+
+log_weight:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: glp1_tracker
+    weight_kg:
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 500
+          step: 0.1
+          unit_of_measurement: kg
+          mode: box
+    time:
+      selector:
+        datetime:
+
+import_shotsy_csv:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: glp1_tracker
+    file_path:
+      example: shotsy.csv
+      selector:
+        text:
+    csv_text:
+      selector:
+        text:
+          multiline: true
+    replace:
+      default: true
+      selector:
+        boolean:
+
+export_data:
+  fields:
+    config_entry_id:
+      selector:
+        config_entry:
+          integration: glp1_tracker

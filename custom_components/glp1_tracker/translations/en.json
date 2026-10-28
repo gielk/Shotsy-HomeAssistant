@@ -1,0 +1,389 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add medication",
+        "description": "Track injections of one medication. You can add more medications later.",
+        "data": {
+          "medication": "Medication",
+          "name": "Name",
+          "default_dose": "Default dose",
+          "interval_days": "Days between injections",
+          "weekday": "Fixed weekday",
+          "injection_time": "Fixed time",
+          "weight_entity": "Weight sensor",
+          "height_entity": "Height sensor",
+          "height_cm": "Height"
+        },
+        "data_description": {
+          "name": "Shown in entity names. Default: the medication.",
+          "default_dose": "Dose for the first injection. After that the last dose is used.",
+          "interval_days": "The next injection is planned this many days after the last one.",
+          "weekday": "Plan on this weekday: the one closest to the interval after the last injection.",
+          "injection_time": "Plan at this time of day. Empty: the time of the last injection.",
+          "weight_entity": "For example the weight from Apple Health via the companion app. Every new value is stored.",
+          "height_entity": "Used for the BMI. Takes precedence over the height below.",
+          "height_cm": "Used for the BMI when there is no height sensor."
+        }
+      },
+      "model": {
+        "title": "Medication level model",
+        "description": "Used to estimate how much medication is in your body.",
+        "data": {
+          "half_life_days": "Half-life",
+          "tmax_hours": "Time to peak"
+        },
+        "data_description": {
+          "half_life_days": "Days until half of the medication has left the body.",
+          "tmax_hours": "Hours after the injection until the highest level."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This medication is already being tracked."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Settings",
+        "data": {
+          "default_dose": "Default dose",
+          "interval_days": "Days between injections",
+          "weekday": "Fixed weekday",
+          "injection_time": "Fixed time",
+          "weight_entity": "Weight sensor",
+          "height_entity": "Height sensor",
+          "height_cm": "Height",
+          "half_life_days": "Half-life",
+          "tmax_hours": "Time to peak",
+          "sites": "Injection sites",
+          "side_effects": "Side effects"
+        },
+        "data_description": {
+          "default_dose": "Dose for the first injection. After that the last dose is used.",
+          "interval_days": "The next injection is planned this many days after the last one.",
+          "weekday": "Plan on this weekday: the one closest to the interval after the last injection.",
+          "injection_time": "Plan at this time of day. Empty: the time of the last injection.",
+          "weight_entity": "For example the weight from Apple Health via the companion app. Every new value is stored.",
+          "height_entity": "Used for the BMI. Takes precedence over the height below.",
+          "height_cm": "Used for the BMI when there is no height sensor.",
+          "half_life_days": "Days until half of the medication has left the body.",
+          "tmax_hours": "Hours after the injection until the highest level.",
+          "sites": "Sites to rotate through, in this order.",
+          "side_effects": "Each one gets a 0-10 entity for the agenda day."
+        }
+      }
+    }
+  },
+  "selector": {
+    "medication": {
+      "options": {
+        "retatrutide": "Retatrutide",
+        "tirzepatide": "Tirzepatide (Mounjaro, Zepbound)",
+        "semaglutide": "Semaglutide (Ozempic, Wegovy)",
+        "custom": "Other (enter the half-life)"
+      }
+    },
+    "weekday": {
+      "options": {
+        "none": "None, use the interval",
+        "0": "Monday",
+        "1": "Tuesday",
+        "2": "Wednesday",
+        "3": "Thursday",
+        "4": "Friday",
+        "5": "Saturday",
+        "6": "Sunday"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "medicatieniveau": {
+        "name": "Medication level"
+      },
+      "laatste_injectie": {
+        "name": "Last injection"
+      },
+      "laatste_dosis": {
+        "name": "Last dose"
+      },
+      "aantal_injecties": {
+        "name": "Injections taken"
+      },
+      "volgende_injectie": {
+        "name": "Next injection"
+      },
+      "gewicht": {
+        "name": "Weight"
+      },
+      "gewicht_verandering": {
+        "name": "Total change"
+      },
+      "gewicht_verandering_procent": {
+        "name": "Change percentage"
+      },
+      "bmi": {
+        "name": "BMI"
+      },
+      "gewicht_per_week": {
+        "name": "Weekly average"
+      },
+      "tot_doel": {
+        "name": "To goal"
+      },
+      "dagoverzicht": {
+        "name": "Day overview"
+      }
+    },
+    "number": {
+      "volgende_dosis": {
+        "name": "Next dose"
+      },
+      "interval": {
+        "name": "Interval"
+      },
+      "doelgewicht": {
+        "name": "Goal weight"
+      },
+      "startgewicht": {
+        "name": "Start weight"
+      },
+      "calorieen": {
+        "name": "Calories"
+      },
+      "eiwitten": {
+        "name": "Protein"
+      },
+      "bijwerking": {
+        "name": "{name}"
+      }
+    },
+    "select": {
+      "volgende_prikplek": {
+        "name": "Next injection site"
+      },
+      "grafiekperiode": {
+        "name": "Chart period",
+        "state": {
+          "1m": "1 month",
+          "3m": "3 months",
+          "6m": "6 months",
+          "all": "All time"
+        }
+      }
+    },
+    "datetime": {
+      "volgende_injectie": {
+        "name": "Next injection"
+      }
+    },
+    "date": {
+      "agendadag": {
+        "name": "Agenda day"
+      }
+    },
+    "text": {
+      "dagnotitie": {
+        "name": "Day note"
+      }
+    },
+    "button": {
+      "injectie_registreren": {
+        "name": "Log injection"
+      }
+    },
+    "calendar": {
+      "agenda": {
+        "name": "Agenda"
+      }
+    }
+  },
+  "exceptions": {
+    "entry_not_found": {
+      "message": "No loaded GLP-1 Tracker entry with ID {entry_id}."
+    },
+    "entry_required": {
+      "message": "Choose a medication: there is more than one, or none is loaded."
+    },
+    "injection_not_found": {
+      "message": "No injection with ID {injection_id}."
+    },
+    "dose_required": {
+      "message": "No dose given and no earlier dose to use."
+    },
+    "path_not_allowed": {
+      "message": "{path} is outside the config folder."
+    },
+    "file_unreadable": {
+      "message": "Could not read {path}: {error}"
+    },
+    "csv_required": {
+      "message": "Give a file or the CSV contents."
+    },
+    "csv_empty": {
+      "message": "No injections or weights found in the CSV."
+    }
+  },
+  "services": {
+    "log_injection": {
+      "name": "Log injection",
+      "description": "Logs an injection. Fields left empty use the planned dose, the suggested site and the current time.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medication",
+          "description": "Only needed when you track more than one medication."
+        },
+        "dose_mg": {
+          "name": "Dose",
+          "description": "Dose in mg."
+        },
+        "time": {
+          "name": "Time",
+          "description": "When it happened. Default: now."
+        },
+        "site": {
+          "name": "Injection site",
+          "description": "For example 'Buik - Links Boven'."
+        },
+        "pain": {
+          "name": "Pain",
+          "description": "Pain from 0 to 10."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free text."
+        }
+      }
+    },
+    "update_injection": {
+      "name": "Update injection",
+      "description": "Changes a logged injection. Fields left empty stay as they are.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medication",
+          "description": "Only needed when you track more than one medication."
+        },
+        "injection_id": {
+          "name": "Injection ID",
+          "description": "ID from the injection list, or 'last' for the most recent one."
+        },
+        "dose_mg": {
+          "name": "Dose",
+          "description": "Dose in mg."
+        },
+        "time": {
+          "name": "Time",
+          "description": "When it happened. Default: now."
+        },
+        "site": {
+          "name": "Injection site",
+          "description": "For example 'Buik - Links Boven'."
+        },
+        "pain": {
+          "name": "Pain",
+          "description": "Pain from 0 to 10."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free text."
+        }
+      }
+    },
+    "delete_injection": {
+      "name": "Delete injection",
+      "description": "Deletes a logged injection.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medication",
+          "description": "Only needed when you track more than one medication."
+        },
+        "injection_id": {
+          "name": "Injection ID",
+          "description": "ID from the injection list, or 'last' for the most recent one."
+        }
+      }
+    },
+    "log_day": {
+      "name": "Log day",
+      "description": "Stores side effects, notes, calories or protein for a day.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medication",
+          "description": "Only needed when you track more than one medication."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Default: the day selected in the agenda."
+        },
+        "side_effects": {
+          "name": "Side effects",
+          "description": "Name and severity from 0 to 10. 0 removes it."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free text."
+        },
+        "calories": {
+          "name": "Calories",
+          "description": "Calories eaten that day."
+        },
+        "protein": {
+          "name": "Protein",
+          "description": "Grams of protein that day."
+        }
+      }
+    },
+    "log_weight": {
+      "name": "Log weight",
+      "description": "Stores a weight measurement.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medication",
+          "description": "Only needed when you track more than one medication."
+        },
+        "weight_kg": {
+          "name": "Weight",
+          "description": "Weight in kg."
+        },
+        "time": {
+          "name": "Time",
+          "description": "When it happened. Default: now."
+        }
+      }
+    },
+    "import_shotsy_csv": {
+      "name": "Import Shotsy export",
+      "description": "Imports injections, weights, side effects and notes from a Shotsy CSV export.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medication",
+          "description": "Only needed when you track more than one medication."
+        },
+        "file_path": {
+          "name": "File",
+          "description": "Path of the CSV file, relative to the config folder."
+        },
+        "csv_text": {
+          "name": "CSV contents",
+          "description": "The contents of the export, instead of a file."
+        },
+        "replace": {
+          "name": "Replace",
+          "description": "Replace the current injections and day logs. Off: only add what is missing."
+        }
+      }
+    },
+    "export_data": {
+      "name": "Export data",
+      "description": "Returns all stored data, for a backup.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medication",
+          "description": "Only needed when you track more than one medication."
+        }
+      }
+    }
+  }
+}

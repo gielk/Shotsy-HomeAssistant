@@ -1,0 +1,12 @@
+{
+  "domain": "glp1_tracker",
+  "name": "GLP-1 Tracker",
+  "codeowners": ["@gielk"],
+  "config_flow": true,
+  "documentation": "https://github.com/gielk/Shotsy-HomeAssistant",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/gielk/Shotsy-HomeAssistant/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

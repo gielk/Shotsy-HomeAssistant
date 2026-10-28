@@ -1,0 +1,389 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Medicatie toevoegen",
+        "description": "Houd de injecties van één medicatie bij. Je kunt later meer medicatie toevoegen.",
+        "data": {
+          "medication": "Medicatie",
+          "name": "Naam",
+          "default_dose": "Standaarddosis",
+          "interval_days": "Dagen tussen injecties",
+          "weekday": "Vaste weekdag",
+          "injection_time": "Vast tijdstip",
+          "weight_entity": "Gewichtsensor",
+          "height_entity": "Lengtesensor",
+          "height_cm": "Lengte"
+        },
+        "data_description": {
+          "name": "Komt in de entiteitnamen. Standaard: de medicatie.",
+          "default_dose": "Dosis voor de eerste injectie. Daarna geldt steeds de laatste dosis.",
+          "interval_days": "De volgende injectie wordt zoveel dagen na de vorige gepland.",
+          "weekday": "Plan op deze weekdag: de dag die het dichtst bij het interval na de vorige injectie ligt.",
+          "injection_time": "Plan op dit tijdstip. Leeg: het tijdstip van de vorige injectie.",
+          "weight_entity": "Bijvoorbeeld het gewicht uit Apple Gezondheid via de companion app. Elke nieuwe waarde wordt bewaard.",
+          "height_entity": "Voor de BMI. Gaat voor de lengte hieronder.",
+          "height_cm": "Voor de BMI als er geen lengtesensor is."
+        }
+      },
+      "model": {
+        "title": "Model medicatieniveau",
+        "description": "Hiermee wordt geschat hoeveel medicatie in je lichaam zit.",
+        "data": {
+          "half_life_days": "Halfwaardetijd",
+          "tmax_hours": "Tijd tot piek"
+        },
+        "data_description": {
+          "half_life_days": "Dagen tot de helft van de medicatie het lichaam heeft verlaten.",
+          "tmax_hours": "Uren na de injectie tot het hoogste niveau."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Deze medicatie wordt al bijgehouden."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Instellingen",
+        "data": {
+          "default_dose": "Standaarddosis",
+          "interval_days": "Dagen tussen injecties",
+          "weekday": "Vaste weekdag",
+          "injection_time": "Vast tijdstip",
+          "weight_entity": "Gewichtsensor",
+          "height_entity": "Lengtesensor",
+          "height_cm": "Lengte",
+          "half_life_days": "Halfwaardetijd",
+          "tmax_hours": "Tijd tot piek",
+          "sites": "Prikplekken",
+          "side_effects": "Bijwerkingen"
+        },
+        "data_description": {
+          "default_dose": "Dosis voor de eerste injectie. Daarna geldt steeds de laatste dosis.",
+          "interval_days": "De volgende injectie wordt zoveel dagen na de vorige gepland.",
+          "weekday": "Plan op deze weekdag: de dag die het dichtst bij het interval na de vorige injectie ligt.",
+          "injection_time": "Plan op dit tijdstip. Leeg: het tijdstip van de vorige injectie.",
+          "weight_entity": "Bijvoorbeeld het gewicht uit Apple Gezondheid via de companion app. Elke nieuwe waarde wordt bewaard.",
+          "height_entity": "Voor de BMI. Gaat voor de lengte hieronder.",
+          "height_cm": "Voor de BMI als er geen lengtesensor is.",
+          "half_life_days": "Dagen tot de helft van de medicatie het lichaam heeft verlaten.",
+          "tmax_hours": "Uren na de injectie tot het hoogste niveau.",
+          "sites": "Plekken om af te wisselen, in deze volgorde.",
+          "side_effects": "Elke bijwerking krijgt een entiteit 0-10 voor de agendadag."
+        }
+      }
+    }
+  },
+  "selector": {
+    "medication": {
+      "options": {
+        "retatrutide": "Retatrutide",
+        "tirzepatide": "Tirzepatide (Mounjaro, Zepbound)",
+        "semaglutide": "Semaglutide (Ozempic, Wegovy)",
+        "custom": "Anders (zelf halfwaardetijd invullen)"
+      }
+    },
+    "weekday": {
+      "options": {
+        "none": "Geen, gebruik het interval",
+        "0": "Maandag",
+        "1": "Dinsdag",
+        "2": "Woensdag",
+        "3": "Donderdag",
+        "4": "Vrijdag",
+        "5": "Zaterdag",
+        "6": "Zondag"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "medicatieniveau": {
+        "name": "Medicatieniveau"
+      },
+      "laatste_injectie": {
+        "name": "Laatste injectie"
+      },
+      "laatste_dosis": {
+        "name": "Laatste dosis"
+      },
+      "aantal_injecties": {
+        "name": "Injecties genomen"
+      },
+      "volgende_injectie": {
+        "name": "Volgende injectie"
+      },
+      "gewicht": {
+        "name": "Gewicht"
+      },
+      "gewicht_verandering": {
+        "name": "Totale verandering"
+      },
+      "gewicht_verandering_procent": {
+        "name": "Procent verandering"
+      },
+      "bmi": {
+        "name": "BMI"
+      },
+      "gewicht_per_week": {
+        "name": "Wekelijks gemiddelde"
+      },
+      "tot_doel": {
+        "name": "Naar doel"
+      },
+      "dagoverzicht": {
+        "name": "Dagoverzicht"
+      }
+    },
+    "number": {
+      "volgende_dosis": {
+        "name": "Volgende dosis"
+      },
+      "interval": {
+        "name": "Interval"
+      },
+      "doelgewicht": {
+        "name": "Doelgewicht"
+      },
+      "startgewicht": {
+        "name": "Startgewicht"
+      },
+      "calorieen": {
+        "name": "Calorieën"
+      },
+      "eiwitten": {
+        "name": "Eiwitten"
+      },
+      "bijwerking": {
+        "name": "{name}"
+      }
+    },
+    "select": {
+      "volgende_prikplek": {
+        "name": "Volgende prikplek"
+      },
+      "grafiekperiode": {
+        "name": "Grafiekperiode",
+        "state": {
+          "1m": "1 maand",
+          "3m": "3 maanden",
+          "6m": "6 maanden",
+          "all": "Altijd"
+        }
+      }
+    },
+    "datetime": {
+      "volgende_injectie": {
+        "name": "Volgende injectie"
+      }
+    },
+    "date": {
+      "agendadag": {
+        "name": "Agendadag"
+      }
+    },
+    "text": {
+      "dagnotitie": {
+        "name": "Dagnotitie"
+      }
+    },
+    "button": {
+      "injectie_registreren": {
+        "name": "Injectie registreren"
+      }
+    },
+    "calendar": {
+      "agenda": {
+        "name": "Agenda"
+      }
+    }
+  },
+  "exceptions": {
+    "entry_not_found": {
+      "message": "Geen geladen GLP-1 Tracker met ID {entry_id}."
+    },
+    "entry_required": {
+      "message": "Kies een medicatie: er zijn er meerdere, of er is er geen geladen."
+    },
+    "injection_not_found": {
+      "message": "Geen injectie met ID {injection_id}."
+    },
+    "dose_required": {
+      "message": "Geen dosis opgegeven en geen eerdere dosis om te gebruiken."
+    },
+    "path_not_allowed": {
+      "message": "{path} ligt buiten de config-map."
+    },
+    "file_unreadable": {
+      "message": "Kon {path} niet lezen: {error}"
+    },
+    "csv_required": {
+      "message": "Geef een bestand of de CSV-inhoud op."
+    },
+    "csv_empty": {
+      "message": "Geen injecties of gewichten gevonden in de CSV."
+    }
+  },
+  "services": {
+    "log_injection": {
+      "name": "Injectie registreren",
+      "description": "Registreert een injectie. Lege velden krijgen de geplande dosis, de voorgestelde prikplek en het huidige tijdstip.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medicatie",
+          "description": "Alleen nodig als je meer dan één medicatie bijhoudt."
+        },
+        "dose_mg": {
+          "name": "Dosis",
+          "description": "Dosis in mg."
+        },
+        "time": {
+          "name": "Tijdstip",
+          "description": "Wanneer het was. Standaard: nu."
+        },
+        "site": {
+          "name": "Prikplek",
+          "description": "Bijvoorbeeld 'Buik - Links Boven'."
+        },
+        "pain": {
+          "name": "Pijn",
+          "description": "Pijn van 0 tot 10."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije tekst."
+        }
+      }
+    },
+    "update_injection": {
+      "name": "Injectie aanpassen",
+      "description": "Past een geregistreerde injectie aan. Lege velden blijven zoals ze zijn.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medicatie",
+          "description": "Alleen nodig als je meer dan één medicatie bijhoudt."
+        },
+        "injection_id": {
+          "name": "Injectie-ID",
+          "description": "ID uit de injectielijst, of 'last' voor de laatste."
+        },
+        "dose_mg": {
+          "name": "Dosis",
+          "description": "Dosis in mg."
+        },
+        "time": {
+          "name": "Tijdstip",
+          "description": "Wanneer het was. Standaard: nu."
+        },
+        "site": {
+          "name": "Prikplek",
+          "description": "Bijvoorbeeld 'Buik - Links Boven'."
+        },
+        "pain": {
+          "name": "Pijn",
+          "description": "Pijn van 0 tot 10."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije tekst."
+        }
+      }
+    },
+    "delete_injection": {
+      "name": "Injectie verwijderen",
+      "description": "Verwijdert een geregistreerde injectie.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medicatie",
+          "description": "Alleen nodig als je meer dan één medicatie bijhoudt."
+        },
+        "injection_id": {
+          "name": "Injectie-ID",
+          "description": "ID uit de injectielijst, of 'last' voor de laatste."
+        }
+      }
+    },
+    "log_day": {
+      "name": "Dag bijhouden",
+      "description": "Bewaart bijwerkingen, notities, calorieën of eiwitten voor een dag.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medicatie",
+          "description": "Alleen nodig als je meer dan één medicatie bijhoudt."
+        },
+        "date": {
+          "name": "Datum",
+          "description": "Standaard: de dag die in de agenda openstaat."
+        },
+        "side_effects": {
+          "name": "Bijwerkingen",
+          "description": "Naam en ernst van 0 tot 10. 0 haalt hem weg."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije tekst."
+        },
+        "calories": {
+          "name": "Calorieën",
+          "description": "Gegeten calorieën die dag."
+        },
+        "protein": {
+          "name": "Eiwitten",
+          "description": "Gram eiwit die dag."
+        }
+      }
+    },
+    "log_weight": {
+      "name": "Gewicht registreren",
+      "description": "Bewaart een gewichtsmeting.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medicatie",
+          "description": "Alleen nodig als je meer dan één medicatie bijhoudt."
+        },
+        "weight_kg": {
+          "name": "Gewicht",
+          "description": "Gewicht in kg."
+        },
+        "time": {
+          "name": "Tijdstip",
+          "description": "Wanneer het was. Standaard: nu."
+        }
+      }
+    },
+    "import_shotsy_csv": {
+      "name": "Shotsy-export importeren",
+      "description": "Importeert injecties, gewichten, bijwerkingen en notities uit een Shotsy CSV-export.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medicatie",
+          "description": "Alleen nodig als je meer dan één medicatie bijhoudt."
+        },
+        "file_path": {
+          "name": "Bestand",
+          "description": "Pad van het CSV-bestand, ten opzichte van de config-map."
+        },
+        "csv_text": {
+          "name": "CSV-inhoud",
+          "description": "De inhoud van de export, in plaats van een bestand."
+        },
+        "replace": {
+          "name": "Vervangen",
+          "description": "Vervang de huidige injecties en daglogs. Uit: alleen toevoegen wat ontbreekt."
+        }
+      }
+    },
+    "export_data": {
+      "name": "Gegevens exporteren",
+      "description": "Geeft alle opgeslagen gegevens terug, als back-up.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Medicatie",
+          "description": "Alleen nodig als je meer dan één medicatie bijhoudt."
+        }
+      }
+    }
+  }
+}

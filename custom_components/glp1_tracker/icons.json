@@ -1,0 +1,35 @@
+{
+  "entity": {
+    "sensor": {
+      "medicatieniveau": { "default": "mdi:chart-bell-curve-cumulative" },
+      "laatste_injectie": { "default": "mdi:needle" },
+      "laatste_dosis": { "default": "mdi:eyedropper" },
+      "aantal_injecties": { "default": "mdi:counter" },
+      "volgende_injectie": { "default": "mdi:calendar-clock" },
+      "gewicht": { "default": "mdi:scale-bathroom" },
+      "gewicht_verandering": { "default": "mdi:trending-down" },
+      "gewicht_verandering_procent": { "default": "mdi:percent-outline" },
+      "bmi": { "default": "mdi:human" },
+      "gewicht_per_week": { "default": "mdi:timer-sand" },
+      "tot_doel": { "default": "mdi:flag-checkered" },
+      "dagoverzicht": { "default": "mdi:calendar-text" }
+    },
+    "number": {
+      "volgende_dosis": { "default": "mdi:eyedropper-plus" },
+      "interval": { "default": "mdi:calendar-sync" },
+      "doelgewicht": { "default": "mdi:flag" },
+      "startgewicht": { "default": "mdi:flag-outline" },
+      "calorieen": { "default": "mdi:food-apple" },
+      "eiwitten": { "default": "mdi:food-steak" }
+    }
+  },
+  "services": {
+    "log_injection": { "service": "mdi:needle" },
+    "update_injection": { "service": "mdi:pencil" },
+    "delete_injection": { "service": "mdi:delete" },
+    "log_day": { "service": "mdi:calendar-edit" },
+    "log_weight": { "service": "mdi:scale-bathroom" },
+    "import_shotsy_csv": { "service": "mdi:file-import" },
+    "export_data": { "service": "mdi:file-export" }
+  }
+}
