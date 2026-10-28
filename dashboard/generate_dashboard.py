@@ -280,7 +280,7 @@ def rond(icon: str, action: str, entity: str, value_js: str) -> dict:
 
 
 def stepper(entity: str, step: float, minimum: float, maximum: float) -> dict[str, dict]:
-    value = f"Number(states['{entity}'].state) || 0"
+    value = f"(Number(states['{entity}'].state) || 0)"
     return {
         "minus": rond(
             "mdi:minus",

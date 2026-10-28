@@ -612,7 +612,7 @@ views:
                   target:
                     entity_id: number.retatrutide_volgende_dosis
                   data:
-                    value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_volgende_dosis''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+                    value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_volgende_dosis''].state) || 0) - 0.5) / 0.5) * 0.5); ]]]'
             plus:
               card:
                 type: custom:button-card
@@ -624,7 +624,7 @@ views:
                   target:
                     entity_id: number.retatrutide_volgende_dosis
                   data:
-                    value: '[[[ return Math.min(50, Math.round((Number(states[''number.retatrutide_volgende_dosis''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+                    value: '[[[ return Math.min(50, Math.round(((Number(states[''number.retatrutide_volgende_dosis''].state) || 0) + 0.5) / 0.5) * 0.5); ]]]'
             datum:
               card:
                 type: custom:button-card
@@ -1500,7 +1500,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_food_noise
                           data:
-                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_food_noise''].state) || 0 - 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_bijwerking_food_noise''].state) || 0) - 1) / 1) * 1); ]]]'
                     plus:
                       card:
                         type: custom:button-card
@@ -1512,7 +1512,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_food_noise
                           data:
-                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_food_noise''].state) || 0 + 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.min(10, Math.round(((Number(states[''number.retatrutide_bijwerking_food_noise''].state) || 0) + 1) / 1) * 1); ]]]'
                   styles:
                     card:
                     - padding: '0'
@@ -1546,7 +1546,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_misselijkheid
                           data:
-                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_misselijkheid''].state) || 0 - 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_bijwerking_misselijkheid''].state) || 0) - 1) / 1) * 1); ]]]'
                     plus:
                       card:
                         type: custom:button-card
@@ -1558,7 +1558,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_misselijkheid
                           data:
-                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_misselijkheid''].state) || 0 + 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.min(10, Math.round(((Number(states[''number.retatrutide_bijwerking_misselijkheid''].state) || 0) + 1) / 1) * 1); ]]]'
                   styles:
                     card:
                     - padding: '0'
@@ -1592,7 +1592,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_brandend_maagzuur
                           data:
-                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_brandend_maagzuur''].state) || 0 - 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_bijwerking_brandend_maagzuur''].state) || 0) - 1) / 1) * 1); ]]]'
                     plus:
                       card:
                         type: custom:button-card
@@ -1604,7 +1604,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_brandend_maagzuur
                           data:
-                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_brandend_maagzuur''].state) || 0 + 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.min(10, Math.round(((Number(states[''number.retatrutide_bijwerking_brandend_maagzuur''].state) || 0) + 1) / 1) * 1); ]]]'
                   styles:
                     card:
                     - padding: '0'
@@ -1638,7 +1638,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_verminderde_eetlust
                           data:
-                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_verminderde_eetlust''].state) || 0 - 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_bijwerking_verminderde_eetlust''].state) || 0) - 1) / 1) * 1); ]]]'
                     plus:
                       card:
                         type: custom:button-card
@@ -1650,7 +1650,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_verminderde_eetlust
                           data:
-                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_verminderde_eetlust''].state) || 0 + 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.min(10, Math.round(((Number(states[''number.retatrutide_bijwerking_verminderde_eetlust''].state) || 0) + 1) / 1) * 1); ]]]'
                   styles:
                     card:
                     - padding: '0'
@@ -1684,7 +1684,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_vermoeidheid
                           data:
-                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_vermoeidheid''].state) || 0 - 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_bijwerking_vermoeidheid''].state) || 0) - 1) / 1) * 1); ]]]'
                     plus:
                       card:
                         type: custom:button-card
@@ -1696,7 +1696,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_vermoeidheid
                           data:
-                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_vermoeidheid''].state) || 0 + 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.min(10, Math.round(((Number(states[''number.retatrutide_bijwerking_vermoeidheid''].state) || 0) + 1) / 1) * 1); ]]]'
                   styles:
                     card:
                     - padding: '0'
@@ -1730,7 +1730,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_constipatie
                           data:
-                            value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_bijwerking_constipatie''].state) || 0 - 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_bijwerking_constipatie''].state) || 0) - 1) / 1) * 1); ]]]'
                     plus:
                       card:
                         type: custom:button-card
@@ -1742,7 +1742,7 @@ views:
                           target:
                             entity_id: number.retatrutide_bijwerking_constipatie
                           data:
-                            value: '[[[ return Math.min(10, Math.round((Number(states[''number.retatrutide_bijwerking_constipatie''].state) || 0 + 1) / 1) * 1); ]]]'
+                            value: '[[[ return Math.min(10, Math.round(((Number(states[''number.retatrutide_bijwerking_constipatie''].state) || 0) + 1) / 1) * 1); ]]]'
                   styles:
                     card:
                     - padding: '0'
@@ -1815,7 +1815,7 @@ views:
                         target:
                           entity_id: number.retatrutide_interval
                         data:
-                          value: '[[[ return Math.max(1, Math.round((Number(states[''number.retatrutide_interval''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+                          value: '[[[ return Math.max(1, Math.round(((Number(states[''number.retatrutide_interval''].state) || 0) - 0.5) / 0.5) * 0.5); ]]]'
                   plus:
                     card:
                       type: custom:button-card
@@ -1827,7 +1827,7 @@ views:
                         target:
                           entity_id: number.retatrutide_interval
                         data:
-                          value: '[[[ return Math.min(28, Math.round((Number(states[''number.retatrutide_interval''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+                          value: '[[[ return Math.min(28, Math.round(((Number(states[''number.retatrutide_interval''].state) || 0) + 0.5) / 0.5) * 0.5); ]]]'
                 styles:
                   card:
                   - padding: '0'
@@ -1881,7 +1881,7 @@ views:
                         target:
                           entity_id: number.retatrutide_doelgewicht
                         data:
-                          value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_doelgewicht''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+                          value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_doelgewicht''].state) || 0) - 0.5) / 0.5) * 0.5); ]]]'
                   plus:
                     card:
                       type: custom:button-card
@@ -1893,7 +1893,7 @@ views:
                         target:
                           entity_id: number.retatrutide_doelgewicht
                         data:
-                          value: '[[[ return Math.min(400, Math.round((Number(states[''number.retatrutide_doelgewicht''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+                          value: '[[[ return Math.min(400, Math.round(((Number(states[''number.retatrutide_doelgewicht''].state) || 0) + 0.5) / 0.5) * 0.5); ]]]'
                 styles:
                   card:
                   - padding: '0'
@@ -1947,7 +1947,7 @@ views:
                         target:
                           entity_id: number.retatrutide_startgewicht
                         data:
-                          value: '[[[ return Math.max(0, Math.round((Number(states[''number.retatrutide_startgewicht''].state) || 0 - 0.5) / 0.5) * 0.5); ]]]'
+                          value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_startgewicht''].state) || 0) - 0.5) / 0.5) * 0.5); ]]]'
                   plus:
                     card:
                       type: custom:button-card
@@ -1959,7 +1959,7 @@ views:
                         target:
                           entity_id: number.retatrutide_startgewicht
                         data:
-                          value: '[[[ return Math.min(400, Math.round((Number(states[''number.retatrutide_startgewicht''].state) || 0 + 0.5) / 0.5) * 0.5); ]]]'
+                          value: '[[[ return Math.min(400, Math.round(((Number(states[''number.retatrutide_startgewicht''].state) || 0) + 0.5) / 0.5) * 0.5); ]]]'
                 styles:
                   card:
                   - padding: '0'
