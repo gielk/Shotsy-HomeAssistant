@@ -176,6 +176,7 @@ button_card_templates:
     triggers_update:
     - date.retatrutide_agendadag
     - sensor.retatrutide_dagoverzicht
+    - sensor.retatrutide_volgende_injectie
     variables:
       dag: |-
         [[[
@@ -189,7 +190,10 @@ button_card_templates:
         if (n < 1 || n > new Date(y, m, 0).getDate()) return {n: null, iso: sel};
         const day = iso(new Date(y, m - 1, n));
         const info = (at('sensor.retatrutide_dagoverzicht', 'month') || [])[n - 1] || {};
-        return {n, iso: day, info, selected: day === sel, today: day === iso(new Date())};
+        const due = st('sensor.retatrutide_volgende_injectie');
+        const planned = due && !['unknown', 'unavailable'].includes(due) && iso(new Date(due)) === day;
+        const dose = at('sensor.retatrutide_volgende_injectie', 'dose_mg');
+        return {n, iso: day, info, planned, dose, selected: day === sel, today: day === iso(new Date())};
         ]]]
     name: '[[[ return variables.dag.n ? String(variables.dag.n) : ''''; ]]]'
     custom_fields:
@@ -218,7 +222,11 @@ button_card_templates:
       - box-shadow: none
       - border: |-
           [[[
-          const d = variables.dag; return d.selected ? '2px solid var(--primary-text-color)' : '2px solid transparent';
+          const kleur = (d) => ['#F9A8D4', '#F472B6', '#EC4899', '#DB2777', '#C026D3', '#A21CAF', '#7E22CE', '#6B21A8', '#4C1D95'][Math.max(0, Math.min(8, Math.round(Number(d)) - 1))];
+          const d = variables.dag;
+          if (d.selected) return '2px solid var(--primary-text-color)';
+          if (d.planned && !d.info.dose) return `2px dashed ${kleur(d.dose || 1)}`;
+          return '2px solid transparent';
           ]]]
       - background: |-
           [[[
@@ -512,6 +520,9 @@ views:
             stroke_width: 2
             unit: mg
             float_precision: 2
+            extend_to: false
+            show:
+              legend_value: false
             data_generator: return (entity.attributes.series || []).filter((p) => p[0] <= Date.now());
           - entity: sensor.retatrutide_medicatieniveau
             name: Met geplande prik
@@ -521,6 +532,9 @@ views:
             stroke_dash: 4
             unit: mg
             float_precision: 2
+            extend_to: false
+            show:
+              legend_value: false
             data_generator: return (entity.attributes.planned || []).filter((p) => p[0] >= Date.now() - 3 * 36e5);
         - type: custom:button-card
           show_icon: false
@@ -546,8 +560,9 @@ views:
               const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
               const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
               const sub = 'color:var(--secondary-text-color)';
+              const ICON = '--mdc-icon-size:16px;width:16px;height:16px;margin:0;display:inline-flex;flex:none';
               const tile = (icon, label, value, extra) => `<div style="padding:12px 10px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left">
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--primary-color)"></ha-icon>${label}</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="${ICON};color:var(--primary-color)"></ha-icon>${label}</div>
               <div style="font-size:22px;font-weight:700;margin-top:6px;line-height:1.1">${value}</div>
               <div style="font-size:11.5px;${sub};margin-top:3px">${extra}</div></div>`;
               const change = num('sensor.retatrutide_gewicht_verandering');
@@ -942,8 +957,9 @@ views:
               const at = (e, a) => states[e]?.attributes?.[a];
               const nl = (x, d = 1) => x === null || x === undefined || x === '' || Number.isNaN(Number(x)) ? '—' : Number(x).toLocaleString('nl-NL', {minimumFractionDigits: d, maximumFractionDigits: d});
               const sub = 'color:var(--secondary-text-color)';
+              const ICON = '--mdc-icon-size:16px;width:16px;height:16px;margin:0;display:inline-flex;flex:none';
               const tile = (icon, label, value, unit) => `<div style="padding:12px 10px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left">
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--primary-color)"></ha-icon>${label}</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="${ICON};color:var(--primary-color)"></ha-icon>${label}</div>
               <div style="font-size:22px;font-weight:700;margin-top:6px;line-height:1.1;white-space:nowrap">${value}<span style="font-size:12px;font-weight:500;${sub}"> ${unit}</span></div></div>`;
               const signed = (x, d) => x === null ? '—' : `${x > 0 ? '+' : ''}${nl(x, d)}`;
               const goalPct = at('sensor.retatrutide_tot_doel', 'to_goal_percent');
@@ -998,28 +1014,32 @@ views:
                 x:
                   format: ddd d MMM yyyy
               markers:
-                size: 0
+                size:
+                - 0
+                - 3
+                - 0
+                strokeWidth: 0
             yaxis:
             - id: kg
               decimals: 0
               apex_config:
-                tickAmount: 4
+                forceNiceScale: true
             - id: mg
               opposite: true
               min: 0
               decimals: 0
               apex_config:
-                tickAmount: 4
+                forceNiceScale: true
             series:
             - entity: sensor.retatrutide_aantal_injecties
               name: Dosis
-              type: area
+              type: line
               curve: stepline
               yaxis_id: mg
               color: '#A21CAF'
-              opacity: 0.15
-              stroke_width: 1.5
+              stroke_width: 2
               unit: mg
+              extend_to: false
               data_generator: const l = [...(entity.attributes.injections || [])].reverse().map((i) => [i.t, i.dose]); if (l.length) l.push([Date.now(), l[l.length - 1][1]]); return l;
             - entity: sensor.retatrutide_gewicht
               name: Gewicht
@@ -1027,8 +1047,10 @@ views:
               yaxis_id: kg
               color: '#DA7756'
               stroke_width: 2.5
+              curve: straight
               unit: kg
               float_precision: 1
+              extend_to: false
               data_generator: return entity.attributes.history || [];
             - entity: number.retatrutide_doelgewicht
               name: Doel
@@ -1152,272 +1174,271 @@ views:
       - title: Agenda
         icon: mdi:calendar-month
         cards:
-        - type: custom:stack-in-card
-          mode: vertical
-          cards:
-          - type: custom:button-card
-            entity: date.retatrutide_agendadag
-            show_icon: false
-            show_name: true
-            show_label: false
-            show_state: false
-            tap_action:
-              action: more-info
-            hold_action:
-              action: none
-            name: |-
-              [[[
-              const st = (e) => states[e]?.state;
-              const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-              const [y, m] = (st('date.retatrutide_agendadag') || iso(new Date())).split('-').map(Number);
-              return new Date(y, m - 1, 1).toLocaleDateString('nl-NL', {month: 'long', year: 'numeric'});
-              ]]]
-            custom_fields:
-              terug:
-                card:
-                  type: custom:button-card
-                  template: glp1_rond
-                  icon: mdi:chevron-left
-                  tap_action:
-                    action: perform-action
-                    perform_action: date.set_value
-                    target:
-                      entity_id: date.retatrutide_agendadag
-                    data:
-                      date: |-
-                        [[[
-                        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                        const [y, m, d] = (states['date.retatrutide_agendadag']?.state || iso(new Date())).split('-').map(Number);
-                        const last = new Date(y, m - 1 + (-1) + 1, 0).getDate();
-                        return iso(new Date(y, m - 1 + (-1), Math.min(d, last)));
-                        ]]]
-              vooruit:
-                card:
-                  type: custom:button-card
-                  template: glp1_rond
-                  icon: mdi:chevron-right
-                  tap_action:
-                    action: perform-action
-                    perform_action: date.set_value
-                    target:
-                      entity_id: date.retatrutide_agendadag
-                    data:
-                      date: |-
-                        [[[
-                        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                        const [y, m, d] = (states['date.retatrutide_agendadag']?.state || iso(new Date())).split('-').map(Number);
-                        const last = new Date(y, m - 1 + (1) + 1, 0).getDate();
-                        return iso(new Date(y, m - 1 + (1), Math.min(d, last)));
-                        ]]]
-              vandaag:
-                card:
-                  type: custom:button-card
-                  template: glp1_pil
-                  icon: mdi:calendar-today
-                  name: Vandaag
-                  tap_action:
-                    action: perform-action
-                    perform_action: date.set_value
-                    target:
-                      entity_id: date.retatrutide_agendadag
-                    data:
-                      date: |-
-                        [[[
-                        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                        return iso(new Date());
-                        ]]]
-              weekdagen: <div style="display:grid;grid-template-columns:repeat(7,1fr);font-size:12px;color:var(--secondary-text-color);text-align:center"><span>ma</span><span>di</span><span>wo</span><span>do</span><span>vr</span><span>za</span><span>zo</span></div>
-            styles:
+        - type: custom:button-card
+          entity: date.retatrutide_agendadag
+          show_icon: false
+          show_name: true
+          show_label: false
+          show_state: false
+          tap_action:
+            action: more-info
+          hold_action:
+            action: none
+          name: |-
+            [[[
+            const st = (e) => states[e]?.state;
+            const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const [y, m] = (st('date.retatrutide_agendadag') || iso(new Date())).split('-').map(Number);
+            return new Date(y, m - 1, 1).toLocaleDateString('nl-NL', {month: 'long', year: 'numeric'});
+            ]]]
+          custom_fields:
+            terug:
               card:
-              - padding: 14px 14px 6px
-              - background: none
-              - box-shadow: none
-              - border: none
-              grid:
-              - grid-template-areas: '"n vandaag terug vooruit" "weekdagen weekdagen weekdagen weekdagen"'
-              - grid-template-columns: 1fr auto 44px 44px
-              - column-gap: 8px
-              name:
-              - justify-self: start
-              - font-size: 20px
-              - font-weight: '700'
-              - text-transform: capitalize
-              custom_fields:
-                weekdagen:
-                - justify-self: stretch
-                - margin-top: 12px
-          - type: grid
-            columns: 7
-            square: false
-            cards:
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 0
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 1
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 2
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 3
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 4
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 5
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 6
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 7
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 8
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 9
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 10
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 11
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 12
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 13
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 14
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 15
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 16
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 17
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 18
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 19
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 20
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 21
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 22
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 23
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 24
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 25
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 26
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 27
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 28
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 29
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 30
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 31
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 32
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 33
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 34
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 35
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 36
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 37
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 38
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 39
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 40
-            - type: custom:button-card
-              template: glp1_dag
-              variables:
-                cel: 41
+                type: custom:button-card
+                template: glp1_rond
+                icon: mdi:chevron-left
+                tap_action:
+                  action: perform-action
+                  perform_action: date.set_value
+                  target:
+                    entity_id: date.retatrutide_agendadag
+                  data:
+                    date: |-
+                      [[[
+                      const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                      const [y, m, d] = (states['date.retatrutide_agendadag']?.state || iso(new Date())).split('-').map(Number);
+                      const last = new Date(y, m - 1 + (-1) + 1, 0).getDate();
+                      return iso(new Date(y, m - 1 + (-1), Math.min(d, last)));
+                      ]]]
+            vooruit:
+              card:
+                type: custom:button-card
+                template: glp1_rond
+                icon: mdi:chevron-right
+                tap_action:
+                  action: perform-action
+                  perform_action: date.set_value
+                  target:
+                    entity_id: date.retatrutide_agendadag
+                  data:
+                    date: |-
+                      [[[
+                      const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                      const [y, m, d] = (states['date.retatrutide_agendadag']?.state || iso(new Date())).split('-').map(Number);
+                      const last = new Date(y, m - 1 + (1) + 1, 0).getDate();
+                      return iso(new Date(y, m - 1 + (1), Math.min(d, last)));
+                      ]]]
+            vandaag:
+              card:
+                type: custom:button-card
+                template: glp1_pil
+                icon: mdi:calendar-today
+                name: Vandaag
+                tap_action:
+                  action: perform-action
+                  perform_action: date.set_value
+                  target:
+                    entity_id: date.retatrutide_agendadag
+                  data:
+                    date: |-
+                      [[[
+                      const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                      return iso(new Date());
+                      ]]]
+            weekdagen: <div style="display:grid;grid-template-columns:repeat(7,1fr);font-size:12px;color:var(--secondary-text-color);text-align:center"><span>ma</span><span>di</span><span>wo</span><span>do</span><span>vr</span><span>za</span><span>zo</span></div>
+            dagen:
+              card:
+                type: grid
+                columns: 7
+                square: false
+                cards:
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 0
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 1
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 2
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 3
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 4
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 5
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 6
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 7
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 8
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 9
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 10
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 11
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 12
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 13
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 14
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 15
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 16
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 17
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 18
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 19
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 20
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 21
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 22
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 23
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 24
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 25
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 26
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 27
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 28
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 29
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 30
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 31
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 32
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 33
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 34
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 35
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 36
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 37
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 38
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 39
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 40
+                - type: custom:button-card
+                  template: glp1_dag
+                  variables:
+                    cel: 41
+          styles:
+            card:
+            - padding: 14px 14px 10px
+            grid:
+            - grid-template-areas: '"n vandaag terug vooruit" "weekdagen weekdagen weekdagen weekdagen" "dagen dagen dagen dagen"'
+            - grid-template-columns: 1fr auto 44px 44px
+            - column-gap: 8px
+            name:
+            - justify-self: start
+            - font-size: 20px
+            - font-weight: '700'
+            - text-transform: capitalize
+            custom_fields:
+              weekdagen:
+              - justify-self: stretch
+              - margin-top: 12px
+              dagen:
+              - justify-self: stretch
+              - margin-top: 4px
         - type: custom:button-card
           template: glp1_kaart
           entity: sensor.retatrutide_dagoverzicht
@@ -1445,9 +1466,10 @@ views:
               const pil = (d) => `<span style="display:inline-flex;align-items:center;padding:1px 9px;border-radius:10px;background:${kleur(d)};color:#fff;font-size:12px;font-weight:600;line-height:20px;white-space:nowrap">${dosis(d)} mg</span>`;
               const tijd = (t) => new Date(t).toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
               const sub = 'color:var(--secondary-text-color)';
+              const ICON = '--mdc-icon-size:16px;width:16px;height:16px;margin:0;display:inline-flex;flex:none';
               const a = states['sensor.retatrutide_dagoverzicht']?.attributes || {};
               const tile = (icon, color, label, value, wide) => `<div style="padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left;${wide ? 'grid-column:span 2' : ''}">
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color}"></ha-icon>${label}</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="${ICON};color:${color}"></ha-icon>${label}</div>
               <div style="font-size:16px;font-weight:600;margin-top:6px;white-space:normal">${value}</div></div>`;
               const inj = (a.injections || []).map((i) => `${pil(i.dose)} <span style="font-size:12.5px;font-weight:400;${sub}">${tijd(i.time)}${i.site ? ' · ' + i.site : ''}</span>`).join('<br>') || '—';
               return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
@@ -1753,28 +1775,161 @@ views:
                     - grid-template-areas: '"minus plus"'
                     - grid-template-columns: 44px 44px
                     - column-gap: 8px
-        - type: grid
-          columns: 2
-          square: false
+        - type: custom:stack-in-card
+          mode: vertical
           cards:
-          - type: tile
+          - type: heading
+            heading: Voeding en notitie
+            heading_style: subtitle
+            icon: mdi:food-apple
+          - type: custom:button-card
+            template: glp1_rij
             entity: number.retatrutide_calorieen
+            icon: mdi:food-apple
             name: Calorieën
-            features:
-            - type: numeric-input
-              style: buttons
-            features_position: bottom
-          - type: tile
+            label: Tik voor een exact getal
+            tap_action:
+              action: more-info
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  entity: number.retatrutide_calorieen
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    val: |-
+                      [[[
+                      const st = (e) => states[e]?.state;
+                      const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+                      const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+                      const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+                      const sub = 'color:var(--secondary-text-color)';
+                      const v = num('number.retatrutide_calorieen'); return v === null ? '—' : `${dosis(v)}<span style="font-size:12px;font-weight:500;${sub}"> kcal</span>`;
+                      ]]]
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_calorieen
+                          data:
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_calorieen''].state) || 0) - 100) / 100) * 100); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_calorieen
+                          data:
+                            value: '[[[ return Math.min(10000, Math.round(((Number(states[''number.retatrutide_calorieen''].state) || 0) + 100) / 100) * 100); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"val minus plus"'
+                    - grid-template-columns: auto 44px 44px
+                    - column-gap: 8px
+                    custom_fields:
+                      val:
+                      - font-size: 18px
+                      - font-weight: '700'
+                      - margin-right: 4px
+                      - white-space: nowrap
+          - type: custom:button-card
+            template: glp1_rij
             entity: number.retatrutide_eiwitten
+            icon: mdi:food-steak
             name: Eiwitten
-            features:
-            - type: numeric-input
-              style: buttons
-            features_position: bottom
-        - type: entities
-          entities:
-          - entity: text.retatrutide_dagnotitie
+            label: Tik voor een exact getal
+            tap_action:
+              action: more-info
+            custom_fields:
+              right:
+                card:
+                  type: custom:button-card
+                  entity: number.retatrutide_eiwitten
+                  show_icon: false
+                  show_name: false
+                  show_state: false
+                  custom_fields:
+                    val: |-
+                      [[[
+                      const st = (e) => states[e]?.state;
+                      const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+                      const num = (e) => { const v = Number(st(e)); return ok(e) && Number.isFinite(v) ? v : null; };
+                      const dosis = (x) => Number(x).toLocaleString('nl-NL', {maximumFractionDigits: 2});
+                      const sub = 'color:var(--secondary-text-color)';
+                      const v = num('number.retatrutide_eiwitten'); return v === null ? '—' : `${dosis(v)}<span style="font-size:12px;font-weight:500;${sub}"> g</span>`;
+                      ]]]
+                    minus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:minus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_eiwitten
+                          data:
+                            value: '[[[ return Math.max(0, Math.round(((Number(states[''number.retatrutide_eiwitten''].state) || 0) - 10) / 10) * 10); ]]]'
+                    plus:
+                      card:
+                        type: custom:button-card
+                        template: glp1_rond
+                        icon: mdi:plus
+                        tap_action:
+                          action: perform-action
+                          perform_action: number.set_value
+                          target:
+                            entity_id: number.retatrutide_eiwitten
+                          data:
+                            value: '[[[ return Math.min(1000, Math.round(((Number(states[''number.retatrutide_eiwitten''].state) || 0) + 10) / 10) * 10); ]]]'
+                  styles:
+                    card:
+                    - padding: '0'
+                    - background: none
+                    - box-shadow: none
+                    - border: none
+                    grid:
+                    - grid-template-areas: '"val minus plus"'
+                    - grid-template-columns: auto 44px 44px
+                    - column-gap: 8px
+                    custom_fields:
+                      val:
+                      - font-size: 18px
+                      - font-weight: '700'
+                      - margin-right: 4px
+                      - white-space: nowrap
+          - type: custom:button-card
+            template: glp1_rij
+            entity: text.retatrutide_dagnotitie
+            icon: mdi:note-text-outline
             name: Notitie voor de dag
+            label: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+              const t = st('text.retatrutide_dagnotitie');
+              return ok('text.retatrutide_dagnotitie') ? t : 'Tik om een notitie toe te voegen';
+              ]]]
+            tap_action:
+              action: more-info
+            custom_fields:
+              right: <ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:24px;color:var(--secondary-text-color)"></ha-icon>
       - title: Instellingen
         icon: mdi:cog
         cards:
@@ -1976,19 +2131,48 @@ views:
                     - font-weight: '700'
                     - margin-right: 4px
                     - white-space: nowrap
-        - type: tile
+        - type: custom:button-card
+          template: glp1_rij
           entity: datetime.retatrutide_volgende_injectie
-          name: Volgende injectie handmatig
           icon: mdi:calendar-edit
+          name: Volgende injectie
+          label: |-
+            [[[
+            const st = (e) => states[e]?.state;
+            const ok = (e) => { const s = st(e); return s !== undefined && s !== 'unknown' && s !== 'unavailable' && s !== ''; };
+            const dag = (t) => new Date(t).toLocaleDateString('nl-NL', {weekday: 'short', day: 'numeric', month: 'short'});
+            const tijd = (t) => new Date(t).toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+            const e = 'datetime.retatrutide_volgende_injectie';
+            return ok(e) ? `${dag(st(e))} om ${tijd(st(e))} · tik om te verzetten` : 'Nog niet gepland';
+            ]]]
           tap_action:
             action: more-info
-        - type: tile
+          custom_fields:
+            right: <ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:24px;color:var(--secondary-text-color)"></ha-icon>
+        - type: custom:button-card
+          template: glp1_rij
           entity: automation.medicatie_injectie_herinnering
-          name: Herinnering op iPhone
           icon: mdi:bell-ring-outline
-          features:
-          - type: toggle
-          features_position: inline
+          name: Herinnering op iPhone
+          label: |-
+            [[[
+            const st = (e) => states[e]?.state;
+            return st('automation.medicatie_injectie_herinnering') === 'on' ? 'Melding op het geplande tijdstip' : 'Uit';
+            ]]]
+          tap_action:
+            action: toggle
+          custom_fields:
+            right: |-
+              [[[
+              const st = (e) => states[e]?.state;
+              const on = st('automation.medicatie_injectie_herinnering') === 'on';
+              return `<div style="width:46px;height:28px;border-radius:14px;position:relative;background:${on ? 'var(--primary-color)' : 'color-mix(in srgb, var(--primary-text-color) 18%, transparent)'}"><div style="position:absolute;top:3px;left:${on ? 21 : 3}px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div></div>`;
+              ]]]
+          styles:
+            img_cell:
+            - background: '[[[ return entity?.state === ''on'' ? ''color-mix(in srgb, var(--primary-color) 18%, transparent)'' : ''color-mix(in srgb, var(--primary-text-color) 8%, transparent)''; ]]]'
+            icon:
+            - color: '[[[ return entity?.state === ''on'' ? ''var(--primary-color)'' : ''var(--secondary-text-color)''; ]]]'
         - type: custom:button-card
           template: glp1_rij
           icon: mdi:cog-outline

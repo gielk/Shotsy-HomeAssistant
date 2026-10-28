@@ -83,6 +83,8 @@ HELPERS = {
         [],
     ),
     "sub": ("const sub = 'color:var(--secondary-text-color)';", []),
+    # button-card stretches an ha-icon inside HTML unless its size is fixed.
+    "ICON": ("const ICON = '--mdc-icon-size:16px;width:16px;height:16px;margin:0;display:inline-flex;flex:none';", []),
 }
 
 
@@ -478,6 +480,8 @@ level_chart = {
             "stroke_width": 2,
             "unit": "mg",
             "float_precision": 2,
+            "extend_to": False,
+            "show": {"legend_value": False},
             "data_generator": "return (entity.attributes.series || []).filter((p) => p[0] <= Date.now());",
         },
         {
@@ -489,6 +493,8 @@ level_chart = {
             "stroke_dash": 4,
             "unit": "mg",
             "float_precision": 2,
+            "extend_to": False,
+            "show": {"legend_value": False},
             "data_generator": "return (entity.attributes.planned || []).filter((p) => p[0] >= Date.now() - 3 * 36e5);",
         },
     ],
@@ -512,7 +518,7 @@ summary_card = {
         "tegels": js(
             """
 const tile = (icon, label, value, extra) => `<div style="padding:12px 10px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left">
-<div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--primary-color)"></ha-icon>${label}</div>
+<div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="${ICON};color:var(--primary-color)"></ha-icon>${label}</div>
 <div style="font-size:22px;font-weight:700;margin-top:6px;line-height:1.1">${value}</div>
 <div style="font-size:11.5px;${sub};margin-top:3px">${extra}</div></div>`;
 const change = num('sensor.@P_gewicht_verandering');
@@ -786,7 +792,7 @@ stats_card = {
         "tegels": js(
             """
 const tile = (icon, label, value, unit) => `<div style="padding:12px 10px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left">
-<div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:var(--primary-color)"></ha-icon>${label}</div>
+<div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="${ICON};color:var(--primary-color)"></ha-icon>${label}</div>
 <div style="font-size:22px;font-weight:700;margin-top:6px;line-height:1.1;white-space:nowrap">${value}<span style="font-size:12px;font-weight:500;${sub}"> ${unit}</span></div></div>`;
 const signed = (x, d) => x === null ? '—' : `${x > 0 ? '+' : ''}${nl(x, d)}`;
 const goalPct = at('sensor.@P_tot_doel', 'to_goal_percent');
@@ -835,23 +841,24 @@ weight_chart = {
             "legend": {"show": True, "position": "top", "horizontalAlign": "left", "fontSize": "12px"},
             "grid": {"strokeDashArray": 3, "borderColor": "rgba(127,127,127,0.18)"},
             "tooltip": {"x": {"format": "ddd d MMM yyyy"}},
-            "markers": {"size": 0},
+            # Per series: dose, weight (a dot per weigh-in), goal.
+            "markers": {"size": [0, 3, 0], "strokeWidth": 0},
         },
         "yaxis": [
-            {"id": "kg", "decimals": 0, "apex_config": {"tickAmount": 4}},
-            {"id": "mg", "opposite": True, "min": 0, "decimals": 0, "apex_config": {"tickAmount": 4}},
+            {"id": "kg", "decimals": 0, "apex_config": {"forceNiceScale": True}},
+            {"id": "mg", "opposite": True, "min": 0, "decimals": 0, "apex_config": {"forceNiceScale": True}},
         ],
         "series": [
             {
                 "entity": "sensor.@P_aantal_injecties",
                 "name": "Dosis",
-                "type": "area",
+                "type": "line",
                 "curve": "stepline",
                 "yaxis_id": "mg",
                 "color": ACCENT,
-                "opacity": 0.15,
-                "stroke_width": 1.5,
+                "stroke_width": 2,
                 "unit": "mg",
+                "extend_to": False,
                 "data_generator": (
                     "const l = [...(entity.attributes.injections || [])].reverse().map((i) => [i.t, i.dose]);"
                     " if (l.length) l.push([Date.now(), l[l.length - 1][1]]); return l;"
@@ -864,8 +871,10 @@ weight_chart = {
                 "yaxis_id": "kg",
                 "color": WEIGHT,
                 "stroke_width": 2.5,
+                "curve": "straight",
                 "unit": "kg",
                 "float_precision": 1,
+                "extend_to": False,
                 "data_generator": "return entity.attributes.history || [];",
             },
             {
@@ -1072,16 +1081,31 @@ return new Date(y, m - 1, 1).toLocaleDateString('nl-NL', {month: 'long', year: '
             + "".join(f"<span>{d}</span>" for d in ("ma", "di", "wo", "do", "vr", "za", "zo"))
             + "</div>"
         ),
+        "dagen": {
+            "card": {
+                "type": "grid",
+                "columns": 7,
+                "square": False,
+                "cards": [
+                    {"type": "custom:button-card", "template": "glp1_dag", "variables": {"cel": i}} for i in range(42)
+                ],
+            }
+        },
     },
     "styles": {
-        "card": css(padding="14px 14px 6px", background="none", box_shadow="none", border="none"),
+        "card": css(padding="14px 14px 10px"),
         "grid": css(
-            grid_template_areas='"n vandaag terug vooruit" "weekdagen weekdagen weekdagen weekdagen"',
+            grid_template_areas=(
+                '"n vandaag terug vooruit" "weekdagen weekdagen weekdagen weekdagen" "dagen dagen dagen dagen"'
+            ),
             grid_template_columns="1fr auto 44px 44px",
             column_gap="8px",
         ),
         "name": css(justify_self="start", font_size="20px", font_weight="700", text_transform="capitalize"),
-        "custom_fields": {"weekdagen": css(justify_self="stretch", margin_top="12px")},
+        "custom_fields": {
+            "weekdagen": css(justify_self="stretch", margin_top="12px"),
+            "dagen": css(justify_self="stretch", margin_top="4px"),
+        },
     },
 }
 
@@ -1094,7 +1118,10 @@ const n = variables.cel - offset + 1;
 if (n < 1 || n > new Date(y, m, 0).getDate()) return {n: null, iso: sel};
 const day = iso(new Date(y, m - 1, n));
 const info = (at('sensor.@P_dagoverzicht', 'month') || [])[n - 1] || {};
-return {n, iso: day, info, selected: day === sel, today: day === iso(new Date())};
+const due = st('sensor.@P_volgende_injectie');
+const planned = due && !['unknown', 'unavailable'].includes(due) && iso(new Date(due)) === day;
+const dose = at('sensor.@P_volgende_injectie', 'dose_mg');
+return {n, iso: day, info, planned, dose, selected: day === sel, today: day === iso(new Date())};
 """
 )
 
@@ -1104,7 +1131,7 @@ DAY_TEMPLATE = {
     "show_name": True,
     "show_label": False,
     "show_state": False,
-    "triggers_update": ["date.@P_agendadag", "sensor.@P_dagoverzicht"],
+    "triggers_update": ["date.@P_agendadag", "sensor.@P_dagoverzicht", "sensor.@P_volgende_injectie"],
     "variables": {"dag": DAY_VARIABLES},
     "name": "[[[ return variables.dag.n ? String(variables.dag.n) : ''; ]]]",
     "custom_fields": {
@@ -1132,7 +1159,12 @@ return `<div style="width:5px;height:5px;border-radius:50%;background:${d.info.d
             border_radius="50%",
             box_shadow="none",
             border=js(
-                "const d = variables.dag; return d.selected ? '2px solid var(--primary-text-color)' : '2px solid transparent';"
+                """
+const d = variables.dag;
+if (d.selected) return '2px solid var(--primary-text-color)';
+if (d.planned && !d.info.dose) return `2px dashed ${kleur(d.dose || 1)}`;
+return '2px solid transparent';
+"""
             ),
             background=js(
                 """
@@ -1156,21 +1188,7 @@ return 'none';
 }
 
 
-month_grid = {
-    "type": "custom:stack-in-card",
-    "mode": "vertical",
-    "cards": [
-        month_header,
-        {
-            "type": "grid",
-            "columns": 7,
-            "square": False,
-            "cards": [
-                {"type": "custom:button-card", "template": "glp1_dag", "variables": {"cel": i}} for i in range(42)
-            ],
-        },
-    ],
-}
+month_grid = month_header
 
 day_card = {
     "type": "custom:button-card",
@@ -1198,7 +1216,7 @@ return n ? `${n} ${n === 1 ? 'bijwerking' : 'bijwerkingen'} genoteerd` : 'Geen b
             """
 const a = states['sensor.@P_dagoverzicht']?.attributes || {};
 const tile = (icon, color, label, value, wide) => `<div style="padding:10px 12px;border-radius:14px;background:color-mix(in srgb, var(--primary-text-color) 5%, transparent);text-align:left;${wide ? 'grid-column:span 2' : ''}">
-<div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="--mdc-icon-size:16px;color:${color}"></ha-icon>${label}</div>
+<div style="display:flex;align-items:center;gap:6px;font-size:12px;${sub}"><ha-icon icon="${icon}" style="${ICON};color:${color}"></ha-icon>${label}</div>
 <div style="font-size:16px;font-weight:600;margin-top:6px;white-space:normal">${value}</div></div>`;
 const inj = (a.injections || []).map((i) => `${pil(i.dose)} <span style="font-size:12.5px;font-weight:400;${sub}">${tijd(i.time)}${i.site ? ' · ' + i.site : ''}</span>`).join('<br>') || '—';
 return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
@@ -1296,33 +1314,6 @@ side_effects_card = {
     ],
 }
 
-food_card = {
-    "type": "grid",
-    "columns": 2,
-    "square": False,
-    "cards": [
-        {
-            "type": "tile",
-            "entity": "number.@P_calorieen",
-            "name": "Calorieën",
-            "features": [{"type": "numeric-input", "style": "buttons"}],
-            "features_position": "bottom",
-        },
-        {
-            "type": "tile",
-            "entity": "number.@P_eiwitten",
-            "name": "Eiwitten",
-            "features": [{"type": "numeric-input", "style": "buttons"}],
-            "features_position": "bottom",
-        },
-    ],
-}
-
-note_card = {
-    "type": "entities",
-    "entities": [{"entity": "text.@P_dagnotitie", "name": "Notitie voor de dag"}],
-}
-
 # ----- Instellingen -----------------------------------------------------------
 
 
@@ -1370,6 +1361,35 @@ def value_row(
     }
 
 
+CHEVRON = '<ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:24px;color:var(--secondary-text-color)"></ha-icon>'
+
+food_card = {
+    "type": "custom:stack-in-card",
+    "mode": "vertical",
+    "cards": [
+        {"type": "heading", "heading": "Voeding en notitie", "heading_style": "subtitle", "icon": "mdi:food-apple"},
+        value_row(
+            "number.@P_calorieen", "mdi:food-apple", "Calorieën", "Tik voor een exact getal", "kcal", 100, 0, 10000, 0
+        ),
+        value_row("number.@P_eiwitten", "mdi:food-steak", "Eiwitten", "Tik voor een exact getal", "g", 10, 0, 1000, 0),
+        {
+            "type": "custom:button-card",
+            "template": "glp1_rij",
+            "entity": "text.@P_dagnotitie",
+            "icon": "mdi:note-text-outline",
+            "name": "Notitie voor de dag",
+            "label": js(
+                """
+const t = st('text.@P_dagnotitie');
+return ok('text.@P_dagnotitie') ? t : 'Tik om een notitie toe te voegen';
+"""
+            ),
+            "tap_action": {"action": "more-info"},
+            "custom_fields": {"right": CHEVRON},
+        },
+    ],
+}
+
 settings_cards = [
     value_row(
         "number.@P_interval",
@@ -1389,19 +1409,50 @@ settings_cards = [
         "number.@P_startgewicht", "mdi:flag-outline", "Startgewicht", "Standaard je eerste meting", "kg", 0.5, 0, 400, 1
     ),
     {
-        "type": "tile",
+        "type": "custom:button-card",
+        "template": "glp1_rij",
         "entity": "datetime.@P_volgende_injectie",
-        "name": "Volgende injectie handmatig",
         "icon": "mdi:calendar-edit",
+        "name": "Volgende injectie",
+        "label": js(
+            """
+const e = 'datetime.@P_volgende_injectie';
+return ok(e) ? `${dag(st(e))} om ${tijd(st(e))} · tik om te verzetten` : 'Nog niet gepland';
+"""
+        ),
         "tap_action": {"action": "more-info"},
+        "custom_fields": {"right": CHEVRON},
     },
     {
-        "type": "tile",
+        "type": "custom:button-card",
+        "template": "glp1_rij",
         "entity": REMINDER,
-        "name": "Herinnering op iPhone",
         "icon": "mdi:bell-ring-outline",
-        "features": [{"type": "toggle"}],
-        "features_position": "inline",
+        "name": "Herinnering op iPhone",
+        "label": js(
+            "return st('REMINDER') === 'on' ? 'Melding op het geplande tijdstip' : 'Uit';".replace("REMINDER", REMINDER)
+        ),
+        "tap_action": {"action": "toggle"},
+        "custom_fields": {
+            "right": js(
+                """
+const on = st('REMINDER') === 'on';
+return `<div style="width:46px;height:28px;border-radius:14px;position:relative;background:${on ? 'var(--primary-color)' : 'color-mix(in srgb, var(--primary-text-color) 18%, transparent)'}"><div style="position:absolute;top:3px;left:${on ? 21 : 3}px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div></div>`;
+""".replace("REMINDER", REMINDER)
+            )
+        },
+        "styles": {
+            "img_cell": [
+                {
+                    "background": "[[[ return entity?.state === 'on' ? 'color-mix(in srgb, var(--primary-color) 18%, transparent)' : 'color-mix(in srgb, var(--primary-text-color) 8%, transparent)'; ]]]"
+                }
+            ],
+            "icon": [
+                {
+                    "color": "[[[ return entity?.state === 'on' ? 'var(--primary-color)' : 'var(--secondary-text-color)'; ]]]"
+                }
+            ],
+        },
     },
     {
         "type": "custom:button-card",
@@ -1410,9 +1461,7 @@ settings_cards = [
         "name": "Meer instellingen",
         "label": "Prikplekken, bijwerkingen, vaste weekdag, sensoren",
         "tap_action": {"action": "navigate", "navigation_path": "/config/integrations/integration/glp1_tracker"},
-        "custom_fields": {
-            "right": '<ha-icon icon="mdi:chevron-right" style="--mdc-icon-size:24px;color:var(--secondary-text-color)"></ha-icon>'
-        },
+        "custom_fields": {"right": CHEVRON},
     },
     {
         "type": "custom:expander-card",
@@ -1473,7 +1522,7 @@ def build(prefix: str, health_prefix: str | None = None) -> dict:
         {
             "title": "Agenda",
             "icon": "mdi:calendar-month",
-            "cards": [month_grid, day_card, side_effects_card, food_card, note_card],
+            "cards": [month_grid, day_card, side_effects_card, food_card],
         },
         {"title": "Instellingen", "icon": "mdi:cog", "cards": settings_cards},
     ]
